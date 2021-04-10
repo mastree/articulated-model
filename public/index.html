@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>2D Web Cad</title>
+    <link rel="stylesheet" href="./tailwind.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="../src/index.ts" defer></script>
+  </head>
+  <body>
+    <div class="px-3 " style="border-width: 2; border-color: black">
+      <div class="flex mt-3">
+        <div class="px-6 flex-col" >
+          <h1 style="text-align: center; margin-bottom: 20px; font-size: 24px; font-weight:bold; background-color: rgb(59, 130, 246); color: white; padding: 10px 50px">
+            Help
+          </h1>
+          <textarea style="border:solid 1px" rows="35" cols="60" readonly >
+Petunjuk Umum
+1. Bagian tengah adalah canvas dimana anda dapat melihat object 3D yang dibuat.
+2. Pada bagian kanan terdapat menu yang memuat berbagai button, slider, dll yang dapat anda gunakan untuk mensimulasikan object yang ada di canvas.
+
+Penjelasan Menu di Bagian Kanan
+1. Reset Button: guna mereset tampilan ke default awal suatu proyeksi
+2. Shading Color Pick: berfungsi mengatur pencahayaan, terdapat dua tipe ambient dan directional yang dapat anda sesuaikan
+3. Directional Vector Sliders: berfungsi untuk mengatur arah datang nya directional light (ada tiga yaitu sumbu x, y, dan z).
+4. Toggle Lighting Button: untuk mngeatur on/off dari fitur shading diatas.
+5. Object Dropdown: Untuk memilih object yang akan anda operasikan.
+6. Projections Dropdown: Untuk memilih jenis proyeksi (dari view) yang diinginkan.
+7. Translation Sliders: 3 slider (sumbu x, y, z) yang berfungsi untuk menggerakkan object terpilih di world pada canvas.
+8. Rotation Sliders: 3 slider (sumbu x, y, z) yang berfungsi untuk memutar object terpilih di world pada canvas.
+9. Scala Sliders: 3 slider (sumbu x, y, z) yang berfungsi untuk mengatur ukuran (scaling) object terpilih di world pada canvas.
+10. Scala Sliders: berfungsi untuk menggerakkan kamera di world pada canvas, yang dibagi menjadi 2, yaitu radius (jauh-dekat) dan angle (yang mengatur rotasi kamera).
+11, Save & Load Button: berfungsi untuk menyimpan dan memuat state.kondisi ke/dari suatu file json.
+
+Menu Khusus
+12. Theta & Phi Sliders: terdapat pada proyeksi oblique, berfungsi untuk mnegatur besaran sudut theta & phi pada oblique view.
+13. FOV Slider: terdapat pada proyeksi persective, berfungsi untuk mengatur besar sudut medan pandang dari proyeksi persective.
+
+Catatan
+1. Untuk sudut satuan yang digunakan adalah Derajat.
+          </textarea>
+        </div>
+        <canvas
+          id="gl-display"
+          width="750"
+          height="750"
+          class="border-2 border-black"
+        ></canvas>
+        <div class="px-3 flex-col">
+          <div>
+            <h2>Reset view</h2>
+            <button class="btn btn-blue w-full" id="resetBtn">Reset</button>
+          </div>
+          <div>
+            <h2>Shading</h2>
+            <div>
+              <input type="color" id="ambientLightColor" name="ambientLightColor"
+              value="#f6b73c">
+              <label for="ambientLightColor">Ambient Light</label>
+            </div>
+            <div>
+              <input type="color" id="directionalLightColor" name="directionalLightColor"
+              value="#f6b73c">
+              <label for="directionalLightColor">Directional Light</label>
+            </div>
+            <div>
+              <h2>Directional Vector</h2>
+              <div>
+                <label for="directional-x">x</label>
+                <input
+                  id="directional-x"
+                  name="directional-x"
+                  type="range"
+                  min="-1"
+                  max="1"
+                  value="0"
+                  step="0.01"
+                />
+                <output for="directional-x">0</output>
+              </div>
+              <div>
+                <label for="directional-y">y</label>
+                <input
+                  id="directional-y"
+                  name="directional-y"
+                  type="range"
+                  min="-1"
+                  max="1"
+                  value="0"
+                  step="0.01"
+                />
+                <output for="directional-y">0</output>
+              </div>
+              <div>
+                <label for="directional-z">z</label>
+                <input
+                  id="directional-z"
+                  name="directional-z"
+                  type="range"
+                  min="-1"
+                  max="1"
+                  value="0"
+                  step="0.01"
+                />
+                <output for="directional-z">0</output>
+              </div>
+            </div>
+            <div>
+              <button class="btn btn-blue w-full" id="toggleLighting">Toggle Lighting</button>
+              <p>Lighting is <span id="lightingStatus">ON</span></p>
+            </div>
+          </div>
+          <div>
+            <label for="objects">Selected Object:</label>
+            <select name="objects" id="selectedObject">
+              <option value="0">Cube</option>
+              <option value="1">Torus</option>
+              <option value="2">Prism</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="projections">Projections:</label>
+            <select name="projections" id="selectedProjection">
+              <option value="orthographic">Orthographic</option>
+              <option value="oblique">Oblique</option>
+              <option value="perspective">Perspective</option>
+            </select>
+          </div>
+
+          <div>
+            <div id="orthographicSlider" hidden>
+              <!-- no need? -->
+            </div>
+
+            <div id="obliqueSlider" hidden>
+              <div>
+                <label for="oblique-theta">theta</label>
+                <input
+                      id="oblique-theta"
+                      name="oblique-theta"
+                      type="range"
+                      min="-180"
+                      max="180"
+                      value="75"
+                      step="1"
+                      oninput="this.nextElementSibling.innerHTML = this.value"
+                />
+               <output for="oblique-theta">75</output>
+              </div>
+              <div>
+                <label for="oblique-phi">phi</label>
+                <input
+                      id="oblique-phi"
+                      name="oblique-phi"
+                      type="range"
+                      min="-180"
+                      max="180"
+                      value="75"
+                      step="1"
+                      oninput="this.nextElementSibling.innerHTML = this.value"
+                />
+                <output for="oblique-phi">75</output>
+              </div>
+            </div>
+
+            <div id="perspectiveSlider" hidden>
+              <label for="perspective-fov">fov</label>
+              <input id="perspective-fov" name="perspective-fov" type="range" min="0" max="180" value="45" step="1" oninput="this.nextElementSibling.innerHTML = this.value">
+              <output for="perspective-fov">45</output>
+            </div>
+          </div>
+
+          <!-- translation -->
+          <div>
+            <h1>Translation</h1>
+            <div>
+              <label for="translation-x">x</label>
+              <input
+                id="translation-x"
+                name="translation-x"
+                type="range"
+                min="-5"
+                max="5"
+                value="0"
+                step="0.025"
+              />
+              <output for="translation-x">0</output>
+            </div>
+            <div>
+              <label for="translation-y">y</label>
+              <input
+                id="translation-y"
+                name="translation-y"
+                type="range"
+                min="-5"
+                max="5"
+                value="0"
+                step="0.025"
+              />
+              <output for="translation-y">0</output>
+            </div>
+            <div>
+              <label for="translation-z">z</label>
+              <input
+                id="translation-z"
+                name="translation-z"
+                type="range"
+                min="-5"
+                max="5"
+                value="0"
+                step="0.025"
+              />
+              <output for="translation-z">0</output>
+            </div>
+          </div>
+
+          <div>
+            <h1>Rotation (in degrees)</h1>
+            <div>
+              <label for="rotation-x">x</label>
+              <input
+                id="rotation-x"
+                name="rotation-x"
+                type="range"
+                min="-360"
+                max="360"
+                value="0"
+              />
+              <output for="rotation-x">0</output>
+            </div>
+            <div>
+              <label for="rotation-y">y</label>
+              <input
+                id="rotation-y"
+                name="rotation-y"
+                type="range"
+                min="-360"
+                max="360"
+                value="0"
+              />
+              <output for="rotation-y">0</output>
+            </div>
+            <div>
+              <label for="rotation-z">z</label>
+              <input
+                id="rotation-z"
+                name="rotation-z"
+                type="range"
+                min="-360"
+                max="360"
+                value="0"
+              />
+              <output for="translation-z">0</output>
+            </div>
+          </div>
+
+          <div>
+            <h1>Scale</h1>
+            <div>
+              <label for="scale-x">x</label>
+              <input
+                id="scale-x"
+                name="scale-x"
+                type="range"
+                min="0.1"
+                max="10"
+                value="1"
+                step="0.1"
+              />
+              <output for="scale-x">1</output>
+            </div>
+            <div>
+              <label for="scale-y">y</label>
+              <input
+                id="scale-y"
+                name="scale-y"
+                type="range"
+                min="0.1"
+                max="10"
+                value="1"
+                step="0.1"
+              />
+              <output for="scale-y">1</output>
+            </div>
+            <div>
+              <label for="scale-z">z</label>
+              <input
+                id="scale-z"
+                name="scale-z"
+                type="range"
+                min="0.1"
+                max="10"
+                value="1"
+                step="0.1"
+              />
+              <output for="scale-z">1</output>
+            </div>
+          </div>
+
+          <!-- <div>
+            <h1>Shear</h1>
+            <div>
+              <label for="shear-x">x</label>
+              <input
+                id="shear-x"
+                name="shear-x"on
+                type="range"
+                min="0.1"
+                max="10"
+                value="1"
+                step="0.1"
+              />
+              <output for="shear-x">1</output>
+            </div>
+            <div>
+              <label for="shear-y">y</label>
+              <input
+                id="shear-y"
+                name="shear-y"
+                type="range"
+                min="0.1"
+                max="10"
+                value="1"
+                step="0.1"
+              />
+              <output for="shear-y">1</output>
+            </div>
+            <div>
+              <label for="shear-z">z</label>
+              <input
+                id="shear-z"
+                name="shear-z"
+                type="range"
+                min="0.1"
+                max="10"
+                value="1"
+                step="0.1"
+              />
+              <output for="shear-z">1</output>
+            </div>
+          </div> -->
+
+          <div>
+            <h1>Camera</h1>
+            <div>
+              <label for="camera-radius">radius</label>
+              <input
+                id="camera-radius"
+                name="camera-radius"
+                type="range"
+                min="-5"
+                max="10"
+                value="1"
+                step="0.1"
+              />
+              <output for="camera-radius">1</output>
+            </div>
+            <div>
+              <label for="camera-angle">angle</label>
+              <input
+                id="camera-angle"
+                name="camera-angle"
+                type="range"
+                min="-360"
+                max="360"
+                value="0"
+                step="1"
+              />
+              <output for="camera-angle">0</output>
+            </div>
+          </div>
+
+          <div>
+            <!-- <input type="file" id="fileSelect" class="" /> -->
+            <a id="downloadLink" style="display:none"></a>
+            <input type="file" id="uploadBtn">
+            <!-- <input type="file" id="uploadBtn" style="display:none"> -->
+            <button id="loadBtn" class="btn btn-blue">Load</button>
+            <button id="saveBtn" class="btn btn-blue cursor-pointer">Save</a>
+          </div>
+          
+        </div>
+    </div>
+  </body>
+</html>
