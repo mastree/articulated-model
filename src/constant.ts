@@ -27,7 +27,7 @@ export const PrismDefault: ShapeConfig = {
 };
 
 export const CameraDefault: CameraConfig = {
-  radius: 1,
+  radius: 10,
   angle: 0,
 };
 

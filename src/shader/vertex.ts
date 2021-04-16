@@ -100,21 +100,21 @@ mat4 rotationMat() {
   float _pitch = uRotation.x;
   float _roll = uRotation.z;
   mat3 yaw = mat3(
-    cos(_yaw), 0, sin(_yaw),
+    cos(_yaw), 0, -sin(_yaw),
     0, 1, 0,
-    -sin(_yaw), 0, cos(_yaw)
+    sin(_yaw), 0, cos(_yaw)
   );
   mat3 pitch = mat3(
     1, 0, 0,
-    0, cos(_pitch), -sin(_pitch),
-    0, sin(_pitch), cos(_pitch)
+    0, cos(_pitch), sin(_pitch),
+    0, -sin(_pitch), cos(_pitch)
   );
   mat3 roll = mat3(
-    cos(_roll), -sin(_roll), 0,
-    sin(_roll), cos(_roll), 0,
+    cos(_roll), sin(_roll), 0,
+    -sin(_roll), cos(_roll), 0,
     0, 0, 1
   );
-  mat3 ypr = yaw * pitch * roll;
+  mat3 ypr = pitch * yaw * roll;
   return mat4(
     ypr[0], 0,
     ypr[1], 0,
