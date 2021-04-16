@@ -13,40 +13,40 @@ export default class Cube extends Shape {
     super(canvas, gl, cubeVertexShader, cubeFragmentShader);
     const vertices = [
       // Front face
-      -1, -1,  1,
-      1, -1,  1,
-      1,  1,  1,
-      -1,  1,  1,
+      0, 0,  2,
+      2, 0,  2,
+      2,  2,  2,
+      0,  2,  2,
 
       // Back face
-      -1, -1, -1,
-      -1,  1, -1,
-      1,  1, -1,
-      1, -1, -1,
+      0, 0, 0,
+      0,  2, 0,
+      2,  2, 0,
+      2, 0, 0,
 
       // Top face
-      -1,  1, -1,
-      -1,  1,  1,
-        1,  1,  1,
-        1,  1, -1,
+      0,  2, 0,
+      0,  2,  2,
+        2,  2,  2,
+        2,  2, 0,
 
       // Bottom face
-      -1, -1, -1,
-        1, -1, -1,
-        1, -1,  1,
-      -1, -1,  1,
+      0, 0, 0,
+        2, 0, 0,
+        2, 0,  2,
+      0, 0,  2,
 
       // Right face
-        1, -1, -1,
-        1,  1, -1,
-        1,  1,  1,
-        1, -1,  1,
+        2, 0, 0,
+        2,  2, 0,
+        2,  2,  2,
+        2, 0,  2,
 
       // Left face
-      -1, -1, -1,
-      -1, -1,  1,
-      -1,  1,  1,
-      -1,  1, -1,
+      0, 0, 0,
+      0, 0,  2,
+      0,  2,  2,
+      0,  2, 0,
     ];
     
     const faceColors = [
@@ -115,6 +115,18 @@ export default class Cube extends Shape {
 
   render() {
     const {gl, program} = this;
+    this.persistVars();
+    
+    gl.useProgram(program);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+    gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+    return;
+  }
+
+  renderWith(addTrans: number[]) {
+    const {gl, program} = this;
+
+    this.programInfo.uAncestorsMatrix.value = addTrans;
     this.persistVars();
     
     gl.useProgram(program);

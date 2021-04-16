@@ -1,3 +1,4 @@
+import m4 from "../utils/m4-utils";
 import { createProgram } from "../utils/shader-utils";
 
 type GLAttribute = {
@@ -44,6 +45,10 @@ type ProgramInfo = {
   // Kalo perlu yang beda di child class, tambah aja di bawah sini@
   optionalAttribute?: GLAttribute;
   optionalUniform?: GLUniform;
+
+  // For articulation
+  anchorPoint: number[]; // length 3 (3D point) 
+  uAncestorsMatrix: GLUniform;
 };
 
 export default abstract class Shape {
@@ -51,6 +56,7 @@ export default abstract class Shape {
   gl: WebGL2RenderingContext;
   program: WebGLProgram;
   programInfo: ProgramInfo;
+  children: Shape[] = [];
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -140,6 +146,18 @@ export default abstract class Shape {
         location: gl.getUniformLocation(program, "uLightingOn"),
         value: true,
       },
+      anchorPoint: ([0, 0, 0] as number[]),
+      uAncestorsMatrix: {
+        type: "mat4",
+        location: gl.getUniformLocation(program, "uAncestorsMatrix"),
+        // prettier-ignore
+        value: [
+          1, 0, 0, 0,
+          0, 1, 0, 0,
+          0, 0, 1, 0,
+          0, 0, 0, 1
+        ],
+      },
     };
   }
 
@@ -214,6 +232,13 @@ export default abstract class Shape {
         location: gl.getUniformLocation(program, "uLightingOn"),
         value: data.programInfo.uLightingOn.value
       },
+      anchorPoint: data.programInfo.anchorPoint,
+      uAncestorsMatrix: {
+        type: "mat4",
+        location: gl.getUniformLocation(program, "uAncestorsMatrix"),
+        // prettier-ignore
+        value: data.programInfo.uAncestorsMatrix.value
+      },
     };
 
     console.log(data.programInfo);
@@ -276,6 +301,7 @@ export default abstract class Shape {
     this.persistUniform(info.uRotation);
     this.persistUniform(info.uScale);
     this.persistUniform(info.uTranslation);
+    this.persistUniform(info.uAncestorsMatrix);
     // lighting
     this.persistUniform(info.uAmbientLight);
     this.persistUniform(info.uDirectionalVector);
@@ -285,6 +311,7 @@ export default abstract class Shape {
 
   // abstract loadData(data: object): void;
   abstract render(): void;
+  abstract renderWith(addTrans: number[]): void;
   abstract loadDefaults(): void;
 
   setProjectionMatrix(projectionMatrix: number[]) {
@@ -297,6 +324,11 @@ export default abstract class Shape {
 
   setTranslation(input: TransformationInput) {
     this.programInfo.uTranslation.value = input;
+    let temp = (this.programInfo.uTranslation.value as number[]);
+    for (let i=0;i<3;i++){
+      temp[i] += this.programInfo.anchorPoint[i];
+    }
+    this.programInfo.uTranslation.value = temp;
   }
 
   setRotate(input: TransformationInput) {
@@ -315,6 +347,42 @@ export default abstract class Shape {
     this.programInfo.uAmbientLight.value = ambientLightColor;
     this.programInfo.uDirectionalLightColor.value = directionalLightColor;
     this.programInfo.uDirectionalVector.value = directionalVector;
+  }
+
+  setAnchorPoint(anchorPoint: number[]){
+    let temp = (this.programInfo.uTranslation.value as number[]);
+    for (let i=0;i<3;i++){
+      temp[i] -= this.programInfo.anchorPoint[i];
+    }
+    this.programInfo.anchorPoint = anchorPoint;
+    for (let i=0;i<3;i++){
+      temp[i] += this.programInfo.anchorPoint[i];
+    }
+    this.programInfo.uTranslation.value = temp;
+  }
+
+  addChild(shape: Shape){
+    this.children.push(shape);
+  }
+
+  getLocalTransformation(): number[]{
+    let ret = [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ];
+    let trans = (this.programInfo.uTranslation.value as number[]);
+    ret = m4.multiply(ret, m4.translation(trans[0], trans[1], trans[2]));
+
+    let rot = (this.programInfo.uRotation.value as number[]);
+    ret = m4.xRotate(ret, rot[0]);
+    ret = m4.yRotate(ret, rot[1]);
+    ret = m4.zRotate(ret, rot[2]);
+
+    let scale = (this.programInfo.uScale.value as number[]);
+    ret = m4.scale(ret, scale[0], scale[1], scale[2]);
+    return ret;
   }
 
   toggleLighting(on: boolean) {

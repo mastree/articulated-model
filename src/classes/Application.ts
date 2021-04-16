@@ -182,6 +182,38 @@ class Application {
     }
   }
 
+  articulateRender(){
+    const { gl } = this;
+    gl.clearDepth(1.0);
+    gl.clearColor(1, 1, 1, 1.0);
+    gl.enable(gl.DEPTH_TEST);
+    // gl.enable(gl.CULL_FACE);
+    gl.depthFunc(gl.LEQUAL);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+    this.applyProjection();
+    this.applyViewTransform();
+
+    this.applyLighting();
+    let ident = [
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    ];
+    this.articulateRenderDfs(this.shapes[0], ident);
+  }
+
+  articulateRenderDfs(node: Shape, ancestorsMat: number[]){
+    node.renderWith(ancestorsMat);
+    let nanc = m4.multiply([...ancestorsMat], node.getLocalTransformation());
+    for (const child of node.children){
+        this.articulateRenderDfs(child, nanc);
+    }
+  }
+
   save(el: any) {
     let str = "" as string;
     let arr = [] as any;

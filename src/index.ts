@@ -15,15 +15,23 @@ if (!gl) {
 
 const app = new Application(canvas, gl);
 const cube = new Cube(canvas, gl);
-const torus = new Torus(canvas, gl);
-const prism = new Prism(canvas, gl);
+const cube2 = new Cube(canvas, gl);
+const cube3 = new Cube(canvas, gl);
 
+console.log(cube.programInfo.uTranslation.value);
+console.log(cube2.programInfo.uTranslation.value);
+console.log(cube3.programInfo.uTranslation.value);
+
+cube.addChild(cube2);
+cube2.addChild(cube3);
 app.shapes.push(cube);
-app.shapes.push(torus);
-app.shapes.push(prism);
+cube2.setAnchorPoint([1, 1, 1]);
+app.shapes.push(cube2);
+cube3.setAnchorPoint([1, 1, 1]);
+app.shapes.push(cube3);
 
 const render = () => {
-  app.render();
+  app.articulateRender();
   window.requestAnimationFrame(render);
 };
 window.requestAnimationFrame(render);

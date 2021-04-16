@@ -9,9 +9,9 @@ type ShapeConfig = {
 };
 
 export const CubeDefault: ShapeConfig = {
-  uTranslation: [0.5, -0.5, 0],
-  uRotation: [0, degToRad(-45), degToRad(-45)],
-  uScale: [0.25, 0.25, 0.25],
+  uTranslation: [0, 0, 0],
+  uRotation: [0, 0, 0],
+  uScale: [1, 1, 1],
 };
 
 export const TorusDefault: ShapeConfig = {
