@@ -188,29 +188,3 @@ export const cubeVertexShader = `
     vLighting = uAmbientLight + (uDirectionalLightColor * directional);
   }
 `;
-
-export const torusVertexShader = `
-  ${variables}
-  
-  ${transformationSnippet}
-  ${matrixSnippet}
-
-  void main() {
-    vColor = aVertexColor;
-    vPosition = aVertexPosition;
-
-    // order -> translate rotate scale
-    mat4 translation = translationMat();
-    mat4 rotation = rotationMat();
-    mat4 scale = scaleMat();
-    mat4 uTransformationMatrix = translation * rotation * scale;
-
-    gl_Position = uProjectionMatrix * uViewMatrix * uTransformationMatrix * vec4(aVertexPosition, 1);
-
-    // lighting
-    vec4 transformedNormal = transpose(inverse(uTransformationMatrix)) * vec4(aVertexNormal, 1);
-    vec3 directionalVector = normalize(uDirectionalVector);
-    float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
-    vLighting = uAmbientLight + (uDirectionalLightColor * directional);
-  }
-`;

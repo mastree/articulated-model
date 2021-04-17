@@ -32,14 +32,9 @@ class Application {
       this.shapes[i].loadData(data.shapes[i]);
     }
 
-    // this.selectedShape?.loadData(data.selectedShape);
     this.camera = data.camera as CameraConfig;
     this.projection = data.projection as Projection;
     this.lighting = data.lighting as LightingConfig;
-
-    // console.log(this);
-
-    // this.render();
   }
 
   loadDefaults() {
@@ -109,7 +104,6 @@ class Application {
   }
 
   applyViewTransform() {
-    // let viewMatrix = new Array<number>(16);
     const { radius, angle } = this.camera;
 
     let cameraMatrix = m4.yRotation(degToRad(angle));
@@ -150,11 +144,11 @@ class Application {
     this.selectedShape = this.shapes[shapeIndex];
   }
 
-  setAmbientLightColor(color: Color) {
+  setAmbientLightColor(color: Vec3) {
     this.lighting.ambientLightColor = color;
   }
 
-  setDirectionalLightColor(color: Color) {
+  setDirectionalLightColor(color: Vec3) {
     this.lighting.directionalLightColor = color;
   }
 
@@ -226,9 +220,9 @@ class Application {
     res: {
       // type: ShapeType;
       id: number;
-      color: Color;
-      selectedColor: Color;
-      points: { id: number; pos: Point2d }[];
+      color: Vec3;
+      selectedColor: Vec3;
+      points: { id: number; pos: Vec2 }[];
     }[]
   ) {
     // let arr: Shape[] = [];

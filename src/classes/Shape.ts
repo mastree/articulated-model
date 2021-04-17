@@ -238,8 +238,6 @@ export default abstract class Shape {
     };
 
     console.log(data.programInfo);
-    // this.programInfo = data.programInfo as ProgramInfo;
-    // this.persistVars();
   }
 
   persistAttribute(attr: GLAttribute) {
@@ -336,8 +334,8 @@ export default abstract class Shape {
   }
 
   setLightingConfig(
-    ambientLightColor: Color,
-    directionalLightColor: Color,
+    ambientLightColor: Vec3,
+    directionalLightColor: Vec3,
     directionalVector: TransformationInput
   ) {
     this.programInfo.uAmbientLight.value = ambientLightColor;
@@ -379,16 +377,4 @@ export default abstract class Shape {
   toggleLighting(on: boolean) {
     this.programInfo.uLightingOn.value = on;
   }
-
-  // abstract toSaveData(): {
-  //   // type: ShapeType;
-  //   id: number;
-  //   color: Color;
-  //   selectedColor: Color;
-  //   // points: { id: number; pos: Point }[];
-  // };
-
-  // TO DO:
-  // array of json buat save sama load:
-  // satu json = {type, color, selected color, points, id}
 }
