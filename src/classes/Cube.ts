@@ -80,8 +80,8 @@ type CubeConfig = {
 export class Cube extends Shape {
   indexBuffer: WebGLBuffer | null;
 
-  constructor(cubeConfig?: CubeConfig) {
-    super(cubeVertexShader, cubeFragmentShader);
+  constructor(name: string = "Default Cube Name", cubeConfig?: CubeConfig) {
+    super(cubeVertexShader, cubeFragmentShader, name);
     const vertices: number[] = cubeConfig
       ? cubeConfig.vertices
         ? toGlVertices(cubeConfig.vertices)

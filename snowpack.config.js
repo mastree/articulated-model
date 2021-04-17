@@ -1,6 +1,10 @@
 module.exports = {
-    "mount": {
+    mount: {
         "public": "/",
         "src": "/src",
+    },
+    baseUrl: "./",
+    alias: {
+        "@": "./src"
     }
 }

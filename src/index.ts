@@ -1,31 +1,15 @@
-import Application from "./classes/Application";
-import { Cube } from "./classes/Cube";
-import { hexToRGB, rgbToHex } from "./utils/color-utils";
+import Application from "@/classes/Application";
+import { ChainCube } from "@/classes/Models/ChainCube";
+import { Model } from "@/classes/Models/Model";
+import { hexToRGB, rgbToHex } from "@/utils/color-utils";
 
-import { degToRad, radToDeg } from "./utils/rotate-utils";
+import { degToRad, radToDeg } from "@/utils/rotate-utils";
+import { TestModel } from "./classes/Models/TestModel";
 
-const canvas = document.getElementById("gl-display") as HTMLCanvasElement;
-const gl = canvas.getContext("webgl2") as WebGL2RenderingContext;
-
-if (!gl) {
-  alert("Your browser does not support WebGL");
-}
-
-const app = new Application(canvas, gl);
-const cube = new Cube({
-  center: [0, 0, 0],
-  size: [2, 2, 2],
-});
-const cube2 = new Cube();
-const cube3 = new Cube();
-
-cube.addChild(cube2);
-cube2.addChild(cube3);
-app.shapes.push(cube);
-cube2.setAnchorPoint([1, 1, 1]);
-app.shapes.push(cube2);
-cube3.setAnchorPoint([1, 1, 1]);
-app.shapes.push(cube3);
+const app = new Application();
+app.models.push(new ChainCube("Chain Cube"));
+// app.models.push(new TestModel("Test Model")); // ! coba uncomment ini lol
+app.setSelectedModel(0);
 
 const render = () => {
   app.articulateRender();
@@ -100,6 +84,45 @@ const objectSelector = document.getElementById(
 if (!objectSelector) {
   throw new Error("Object selector not found");
 }
+const populateObjectSelector = () => {
+  while (objectSelector.length) {
+    objectSelector.remove(0);
+  }
+  const { options: optionList } = objectSelector;
+  const options = app.shapes.map((e, i) => {
+    return {
+      value: i,
+      text: e.name,
+    };
+  });
+  options.forEach((option) =>
+    optionList.add(new Option(option.text, option.value.toString()))
+  );
+};
+populateObjectSelector();
+
+const modelSelector = document.getElementById(
+  "selectedModel"
+) as HTMLSelectElement;
+if (!modelSelector) {
+  throw new Error("Model selector not found");
+}
+const populateModelSelector = () => {
+  while (modelSelector.length) {
+    modelSelector.remove(0);
+  }
+  const { options: optionList } = modelSelector;
+  const options = app.models.map((e, i) => {
+    return {
+      value: i,
+      text: e.name,
+    };
+  });
+  options.forEach((option) =>
+    optionList.add(new Option(option.text, option.value.toString()))
+  );
+};
+populateModelSelector();
 
 const changeShape = (shapeIndex: number) => {
   app.setSelectedShape(shapeIndex);
@@ -128,6 +151,15 @@ changeShape(0); // 0 is cube
 
 objectSelector.onchange = () => {
   changeShape(parseInt(objectSelector.value));
+};
+
+const changeModel = (modelIndex: number) => {
+  app.setSelectedModel(modelIndex);
+};
+
+modelSelector.onchange = () => {
+  changeModel(parseInt(modelSelector.value));
+  populateObjectSelector();
 };
 
 const projectionSelector = document.getElementById(

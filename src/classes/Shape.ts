@@ -2,58 +2,16 @@ import { gl } from "../sauce";
 import m4 from "../utils/m4-utils";
 import { createProgram } from "../utils/shader-utils";
 
-type GLAttribute = {
-  buffer: WebGLBuffer | null;
-  location: WebGLUniformLocation | null;
-  value: number[];
-  size: number;
-};
-
-type UniformNumber = "mat4" | "vec3";
-type UniformBool = "bool";
-
-type GLUniform =
-  | {
-      type: UniformNumber;
-      location: WebGLUniformLocation | null;
-      value: number[];
-    }
-  | {
-      type: UniformBool;
-      location: WebGLUniformLocation | null;
-      value: boolean;
-    };
-
-type ProgramInfo = {
-  program: WebGLProgram;
-  aVertexPosition: GLAttribute;
-  aVertexNormal: GLAttribute;
-  aVertexColor: GLAttribute;
-  uTranslation: GLUniform;
-  uRotation: GLUniform;
-  uScale: GLUniform;
-  uProjectionMatrix: GLUniform;
-  uViewMatrix: GLUniform;
-
-  uAmbientLight: GLUniform;
-  uDirectionalVector: GLUniform;
-  uDirectionalLightColor: GLUniform;
-  uLightingOn: GLUniform;
-  // Kalo perlu yang beda di child class, tambah aja di bawah sini@
-  optionalAttribute?: GLAttribute;
-  optionalUniform?: GLUniform;
-
-  // For articulation
-  anchorPoint: number[]; // length 3 (3D point)
-  uAncestorsMatrix: GLUniform;
-};
-
 export default abstract class Shape {
   program: WebGLProgram;
   programInfo: ProgramInfo;
   children: Shape[] = [];
 
-  constructor(vertexShader: string, fragmentShader: string) {
+  constructor(
+    vertexShader: string,
+    fragmentShader: string,
+    public name: string = "Default Shape Name"
+  ) {
     this.program = createProgram(gl, vertexShader, fragmentShader);
 
     const { program } = this;

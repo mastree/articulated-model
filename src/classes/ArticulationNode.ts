@@ -1,3 +1,4 @@
+import { gl } from "../sauce";
 import m4 from "../utils/m4-utils";
 import Shape from "./Shape";
 
@@ -12,7 +13,6 @@ class ArticulationNode {
 }
 
 export const renderArticulateObject = (root: ArticulationNode) => {
-  const { gl } = root.shape;
   gl.clearDepth(1.0);
   gl.clearColor(1, 1, 1, 1.0);
   gl.enable(gl.DEPTH_TEST);

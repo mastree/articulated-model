@@ -1,22 +1,19 @@
+import { canvas, gl } from "@/sauce";
 import { CameraDefault, LightingDefault } from "../constant";
 import m4 from "../utils/m4-utils";
 import { degToRad } from "../utils/rotate-utils";
+import { Model } from "./Models/Model";
 import Shape from "./Shape";
 
 class Application {
-  canvas: HTMLCanvasElement;
-  gl: WebGL2RenderingContext;
-  shapes: Shape[];
-  selectedShape: Shape | null;
+  models: Model[] = [];
+  shapes: Shape[] = [];
+  selectedShape: Shape | null = null;
   camera: CameraConfig;
   projection: Projection;
   lighting: LightingConfig;
 
-  constructor(canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) {
-    this.canvas = canvas;
-    this.gl = gl;
-    this.shapes = [];
-    this.selectedShape = null;
+  constructor() {
     this.projection = "orthographic";
     this.camera = {
       radius: 1,
@@ -83,7 +80,6 @@ class Application {
         );
         break;
       case "perspective":
-        const { canvas } = this;
         const ratio = canvas.clientWidth / canvas.clientHeight;
         const fovSlider = document.getElementById(
           "perspective-fov"
@@ -140,6 +136,13 @@ class Application {
     this.camera.angle = angle;
   }
 
+  setSelectedModel(modelIndex: number) {
+    this.shapes = this.models[modelIndex].shapes;
+    this.selectedShape = this.shapes[0];
+    console.log(modelIndex);
+    console.log(this.shapes);
+  }
+
   setSelectedShape(shapeIndex: number) {
     this.selectedShape = this.shapes[shapeIndex];
   }
@@ -157,7 +160,6 @@ class Application {
   }
 
   render() {
-    const { gl } = this;
     gl.clearDepth(1.0);
     gl.clearColor(1, 1, 1, 1.0);
     gl.enable(gl.DEPTH_TEST);
@@ -177,7 +179,6 @@ class Application {
   }
 
   articulateRender() {
-    const { gl } = this;
     gl.clearDepth(1.0);
     gl.clearColor(1, 1, 1, 1.0);
     gl.enable(gl.DEPTH_TEST);
