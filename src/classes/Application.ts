@@ -26,12 +26,12 @@ class Application {
     this.lighting = LightingDefault;
   }
 
-  loadDataFromJSON(data: any){
+  loadDataFromJSON(data: any) {
     // console.log(this);
-    for(let i = 0; i < this.shapes.length; i++){
+    for (let i = 0; i < this.shapes.length; i++) {
       this.shapes[i].loadData(data.shapes[i]);
     }
-    
+
     // this.selectedShape?.loadData(data.selectedShape);
     this.camera = data.camera as CameraConfig;
     this.projection = data.projection as Projection;
@@ -179,6 +179,33 @@ class Application {
     this.applyLighting();
     for (const shape of this.shapes) {
       shape.render();
+    }
+  }
+
+  articulateRender() {
+    const { gl } = this;
+    gl.clearDepth(1.0);
+    gl.clearColor(1, 1, 1, 1.0);
+    gl.enable(gl.DEPTH_TEST);
+    // gl.enable(gl.CULL_FACE);
+    gl.depthFunc(gl.LEQUAL);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+    this.applyProjection();
+    this.applyViewTransform();
+
+    this.applyLighting();
+    let ident = m4.identity();
+    this.articulateRenderDfs(this.shapes[0], ident);
+  }
+
+  articulateRenderDfs(node: Shape, ancestorsMat: number[]) {
+    node.renderWith(ancestorsMat);
+    let nanc = m4.multiply([...ancestorsMat], node.getLocalTransformation());
+    for (const child of node.children) {
+      this.articulateRenderDfs(child, nanc);
     }
   }
 

@@ -96,25 +96,25 @@ mat4 translationMat() {
 // http://planning.cs.uiuc.edu/node102.html
 mat4 rotationMat() {
   // Angle is in radians!
-  float _yaw = uRotation.z;
-  float _pitch = uRotation.y;
-  float _roll = uRotation.x;
+  float _yaw = uRotation.y;
+  float _pitch = uRotation.x;
+  float _roll = uRotation.z;
   mat3 yaw = mat3(
-    cos(_yaw), 0, sin(_yaw),
+    cos(_yaw), 0, -sin(_yaw),
     0, 1, 0,
-    - sin(_yaw), 0, cos(_yaw)
+    sin(_yaw), 0, cos(_yaw)
   );
   mat3 pitch = mat3(
     1, 0, 0,
-    0, cos(_pitch), -sin(_pitch),
-    0, sin(_pitch), cos(_pitch)
+    0, cos(_pitch), sin(_pitch),
+    0, -sin(_pitch), cos(_pitch)
   );
   mat3 roll = mat3(
-    cos(_roll), -sin(_roll), 0,
-    sin(_roll), cos(_roll), 0,
+    cos(_roll), sin(_roll), 0,
+    -sin(_roll), cos(_roll), 0,
     0, 0, 1
   );
-  mat3 ypr = yaw * pitch * roll;
+  mat3 ypr = pitch * yaw * roll;
   return mat4(
     ypr[0], 0,
     ypr[1], 0,
@@ -142,6 +142,7 @@ const variables = `
   attribute vec4 aVertexColor;
 
   // transformation
+  uniform mat4 uAncestorsMatrix;
   uniform mat4 uProjectionMatrix;
   uniform mat4 uViewMatrix;
   uniform vec3 uTranslation;
@@ -162,18 +163,21 @@ const variables = `
 
 export const cubeVertexShader = `
   ${variables}
+  attribute  vec2 vTexCoord;
+  varying vec2 fTexCoord;
   
   ${transformationSnippet}
   ${matrixSnippet}
 
   void main() {
+    fTexCoord = vTexCoord;
     vColor = aVertexColor;
     vPosition = aVertexPosition;
 
     mat4 translation = translationMat();
     mat4 rotation = rotationMat();
     mat4 scale = scaleMat();
-    mat4 uTransformationMatrix = translation * rotation * scale;
+    mat4 uTransformationMatrix = uAncestorsMatrix * translation * rotation * scale;
     gl_Position = uProjectionMatrix * uViewMatrix * uTransformationMatrix *  vec4(aVertexPosition, 1);
     // gl_Position = uProjectionMatrix * uTransformationMatrix *  vec4(aVertexPosition, 1);
 

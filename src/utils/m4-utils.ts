@@ -11,6 +11,15 @@ export const mapRange = (
 ) => ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
 
 const m4 = {
+  identity: () => {
+    // prettier-ignore
+    return [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1,
+    ]
+  },
   transpose: (mat: number[]) => {
     const ret: number[] = new Array<number>(16);
     for (let i = 0; i < 4; i++) {
@@ -230,27 +239,26 @@ const m4 = {
       0, 0, 0, 1
     ])
   },
-  perspective:(field: number, ratio: number, z_near: number, z_far: number)=>{
+  perspective: (
+    field: number,
+    ratio: number,
+    z_near: number,
+    z_far: number
+  ) => {
     const k = 1 / Math.tan(field / 2);
-    const j = k/ratio;
-    const mat_res =[
-      j, 0, 0, 0,
-      0, k, 0, 0,
-      0, 0, 0, -1,
-      0, 0, 0, 0,
-    ];
+    const j = k / ratio;
+    const mat_res = [j, 0, 0, 0, 0, k, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0];
 
-    if (z_far !== Infinity && z_far != null ){
-      const p = 1 / (z_near-z_far);
-      mat_res[10] = p*(z_far+z_near);
-      mat_res[14] = p*z_far*z_near*2;
-    } 
-    else{
+    if (z_far !== Infinity && z_far != null) {
+      const p = 1 / (z_near - z_far);
+      mat_res[10] = p * (z_far + z_near);
+      mat_res[14] = p * z_far * z_near * 2;
+    } else {
       mat_res[10] = -1;
       mat_res[14] = -2 * z_near;
     }
 
     return mat_res;
-  }
+  },
 };
 export default m4;
