@@ -37,4 +37,43 @@ export const LightingDefault: LightingConfig = {
   directionalVector: [1, 1, 1],
 };
 
+export const imageSize = 4;
+export const image = [
+  0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255,
+  255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255,
+  0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255,
+  255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255,
+];
+export const texPos = [
+  0, 0,
+  1, 0,
+  1, 1,
+  0, 1,
+  
+  0, 0,
+  1, 0,
+  1, 1,
+  0, 1,
+
+  0, 0,
+  1, 0,
+  1, 1,
+  0, 1,
+
+  0, 0,
+  1, 0,
+  1, 1,
+  0, 1,
+
+  0, 0,
+  1, 0,
+  1, 1,
+  0, 1,
+
+  0, 0,
+  1, 0,
+  1, 1,
+  0, 1,
+];
+
 export const ShapeDefaults = [CubeDefault, TorusDefault, PrismDefault];

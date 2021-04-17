@@ -163,11 +163,14 @@ const variables = `
 
 export const cubeVertexShader = `
   ${variables}
+  attribute  vec2 vTexCoord;
+  varying vec2 fTexCoord;
   
   ${transformationSnippet}
   ${matrixSnippet}
 
   void main() {
+    fTexCoord = vTexCoord;
     vColor = aVertexColor;
     vPosition = aVertexPosition;
 

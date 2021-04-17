@@ -10,22 +10,14 @@ uniform bool uLightingOn;
 
 export const cubeFragmentShader = `
   ${variables}
+  varying vec2 fTexCoord;
+  uniform sampler2D texture;
+  
   void main() {
-    // float xy = min( abs(vPosition.x), abs(vPosition.y));
-    // float xz = min( abs(vPosition.x), abs(vPosition.z));
-    // float yz = min( abs(vPosition.y), abs(vPosition.z));
-    // float b1 = 0.74;
-    // float b2 = 0.76;
-    // float b3 = 0.98;
-    // if ((xy < b1) && (xz < b1) && (yz < b1))
-    //     discard;
-    // else if ((xy < b2) && (xz < b2) && (yz < b2))
-    //     gl_FragColor = vec4(0, 0, 0, 1);
-    // else if ((xy > b3) || (xz > b3) || (yz > b3))
-    //     gl_FragColor = vec4(0, 0, 0, 1);
-    // else {
-        gl_FragColor = uLightingOn ? vec4(vec3(vColor) * vLighting, 1.0) : vColor;
-    // }
+    vec4 texCol = texture2D( texture, fTexCoord );
+    vec4 curCol = vColor * texCol;
+    // vec4 curCol = vColor;
+    gl_FragColor = uLightingOn ? vec4(vec3(curCol) * vLighting, 1.0) : curCol;
   }
 `;
 
