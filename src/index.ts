@@ -12,12 +12,12 @@ if (!gl) {
 }
 
 const app = new Application(canvas, gl);
-const cube = new Cube(canvas, gl, {
+const cube = new Cube({
   center: [0, 0, 0],
   size: [2, 2, 2],
 });
-const cube2 = new Cube(canvas, gl);
-const cube3 = new Cube(canvas, gl);
+const cube2 = new Cube();
+const cube3 = new Cube();
 
 cube.addChild(cube2);
 cube2.addChild(cube3);

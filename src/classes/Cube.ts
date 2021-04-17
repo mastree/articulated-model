@@ -4,6 +4,7 @@ import { degToRad } from "../utils/rotate-utils";
 import Shape from "./Shape";
 import { CubeDefault, imageSize, image, texPos } from "../constant";
 import vector from "../utils/vector-utils";
+import { gl } from "../sauce";
 
 // generate 8 vertices
 export const genCubeVertices = (center: Vec3, size: Vec3): Vec3[] => {
@@ -79,12 +80,8 @@ type CubeConfig = {
 export class Cube extends Shape {
   indexBuffer: WebGLBuffer | null;
 
-  constructor(
-    canvas: HTMLCanvasElement,
-    gl: WebGL2RenderingContext,
-    cubeConfig?: CubeConfig
-  ) {
-    super(canvas, gl, cubeVertexShader, cubeFragmentShader);
+  constructor(cubeConfig?: CubeConfig) {
+    super(cubeVertexShader, cubeFragmentShader);
     const vertices: number[] = cubeConfig
       ? cubeConfig.vertices
         ? toGlVertices(cubeConfig.vertices)
@@ -199,7 +196,7 @@ export class Cube extends Shape {
   }
 
   render() {
-    const { gl, program } = this;
+    const { program } = this;
     this.persistVars();
 
     gl.useProgram(program);
@@ -209,7 +206,7 @@ export class Cube extends Shape {
   }
 
   renderWith(addTrans: number[]) {
-    const { gl, program } = this;
+    const { program } = this;
 
     this.programInfo.uAncestorsMatrix.value = addTrans;
     this.persistVars();

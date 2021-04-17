@@ -1,3 +1,4 @@
+import { gl } from "../sauce";
 import m4 from "../utils/m4-utils";
 import { createProgram } from "../utils/shader-utils";
 
@@ -48,20 +49,11 @@ type ProgramInfo = {
 };
 
 export default abstract class Shape {
-  canvas: HTMLCanvasElement;
-  gl: WebGL2RenderingContext;
   program: WebGLProgram;
   programInfo: ProgramInfo;
   children: Shape[] = [];
 
-  constructor(
-    canvas: HTMLCanvasElement,
-    gl: WebGL2RenderingContext,
-    vertexShader: string,
-    fragmentShader: string
-  ) {
-    this.canvas = canvas;
-    this.gl = gl;
+  constructor(vertexShader: string, fragmentShader: string) {
     this.program = createProgram(gl, vertexShader, fragmentShader);
 
     const { program } = this;
@@ -160,7 +152,7 @@ export default abstract class Shape {
   loadData(data: any): void {
     console.log(data.programInfo);
 
-    const { program, gl } = this;
+    const { program } = this;
     this.programInfo = {
       program: this.program,
       aVertexPosition: {
@@ -241,7 +233,6 @@ export default abstract class Shape {
   }
 
   persistAttribute(attr: GLAttribute) {
-    const { gl } = this;
     gl.bindBuffer(gl.ARRAY_BUFFER, attr.buffer);
     gl.bufferData(
       gl.ARRAY_BUFFER,
@@ -262,7 +253,6 @@ export default abstract class Shape {
   }
 
   persistUniform(uniform: GLUniform) {
-    const { gl } = this;
     switch (uniform.type) {
       case "mat4":
         gl.uniformMatrix4fv(
@@ -281,7 +271,7 @@ export default abstract class Shape {
   }
 
   persistVars() {
-    this.gl.useProgram(this.program);
+    gl.useProgram(this.program);
 
     const { programInfo: info } = this;
 
