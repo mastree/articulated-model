@@ -26,12 +26,12 @@ class Application {
     this.lighting = LightingDefault;
   }
 
-  loadDataFromJSON(data: any){
+  loadDataFromJSON(data: any) {
     // console.log(this);
-    for(let i = 0; i < this.shapes.length; i++){
+    for (let i = 0; i < this.shapes.length; i++) {
       this.shapes[i].loadData(data.shapes[i]);
     }
-    
+
     // this.selectedShape?.loadData(data.selectedShape);
     this.camera = data.camera as CameraConfig;
     this.projection = data.projection as Projection;
@@ -182,7 +182,7 @@ class Application {
     }
   }
 
-  articulateRender(){
+  articulateRender() {
     const { gl } = this;
     gl.clearDepth(1.0);
     gl.clearColor(1, 1, 1, 1.0);
@@ -197,20 +197,15 @@ class Application {
     this.applyViewTransform();
 
     this.applyLighting();
-    let ident = [
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    ];
+    let ident = m4.identity();
     this.articulateRenderDfs(this.shapes[0], ident);
   }
 
-  articulateRenderDfs(node: Shape, ancestorsMat: number[]){
+  articulateRenderDfs(node: Shape, ancestorsMat: number[]) {
     node.renderWith(ancestorsMat);
     let nanc = m4.multiply([...ancestorsMat], node.getLocalTransformation());
-    for (const child of node.children){
-        this.articulateRenderDfs(child, nanc);
+    for (const child of node.children) {
+      this.articulateRenderDfs(child, nanc);
     }
   }
 

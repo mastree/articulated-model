@@ -23,10 +23,6 @@ type GLUniform =
       value: boolean;
     };
 
-// uniform vec3 uAmbientLight;
-// uniform vec3 uDirectionalVector;
-// uniform vec3 uDirectionalLightColor;
-
 type ProgramInfo = {
   program: WebGLProgram;
   aVertexPosition: GLAttribute;
@@ -47,7 +43,7 @@ type ProgramInfo = {
   optionalUniform?: GLUniform;
 
   // For articulation
-  anchorPoint: number[]; // length 3 (3D point) 
+  anchorPoint: number[]; // length 3 (3D point)
   uAncestorsMatrix: GLUniform;
 };
 
@@ -146,7 +142,7 @@ export default abstract class Shape {
         location: gl.getUniformLocation(program, "uLightingOn"),
         value: true,
       },
-      anchorPoint: ([0, 0, 0] as number[]),
+      anchorPoint: [0, 0, 0] as number[],
       uAncestorsMatrix: {
         type: "mat4",
         location: gl.getUniformLocation(program, "uAncestorsMatrix"),
@@ -189,13 +185,13 @@ export default abstract class Shape {
         type: "mat4",
         location: gl.getUniformLocation(program, "uProjectionMatrix"),
         // prettier-ignore
-        value: data.programInfo.uProjectionMatrix.value
+        value: data.programInfo.uProjectionMatrix.value,
       },
       uViewMatrix: {
         type: "mat4",
         location: gl.getUniformLocation(program, "uViewMatrix"),
         // prettier-ignore
-        value: data.programInfo.uViewMatrix.value
+        value: data.programInfo.uViewMatrix.value,
       },
       uTranslation: {
         type: "vec3",
@@ -205,12 +201,12 @@ export default abstract class Shape {
       uRotation: {
         type: "vec3",
         location: gl.getUniformLocation(program, "uRotation"),
-        value: data.programInfo.uRotation.value
+        value: data.programInfo.uRotation.value,
       },
       uScale: {
         type: "vec3",
         location: gl.getUniformLocation(program, "uScale"),
-        value: data.programInfo.uScale.value
+        value: data.programInfo.uScale.value,
       },
       uAmbientLight: {
         type: "vec3",
@@ -220,31 +216,31 @@ export default abstract class Shape {
       uDirectionalVector: {
         type: "vec3",
         location: gl.getUniformLocation(program, "uDirectionalVector"),
-        value: data.programInfo.uDirectionalVector.value
+        value: data.programInfo.uDirectionalVector.value,
       },
       uDirectionalLightColor: {
         type: "vec3",
         location: gl.getUniformLocation(program, "uDirectionalLightColor"),
-        value: data.programInfo.uDirectionalLightColor.value
+        value: data.programInfo.uDirectionalLightColor.value,
       },
       uLightingOn: {
         type: "bool",
         location: gl.getUniformLocation(program, "uLightingOn"),
-        value: data.programInfo.uLightingOn.value
+        value: data.programInfo.uLightingOn.value,
       },
       anchorPoint: data.programInfo.anchorPoint,
       uAncestorsMatrix: {
         type: "mat4",
         location: gl.getUniformLocation(program, "uAncestorsMatrix"),
         // prettier-ignore
-        value: data.programInfo.uAncestorsMatrix.value
+        value: data.programInfo.uAncestorsMatrix.value,
       },
     };
 
     console.log(data.programInfo);
     // this.programInfo = data.programInfo as ProgramInfo;
     // this.persistVars();
-	}
+  }
 
   persistAttribute(attr: GLAttribute) {
     const { gl } = this;
@@ -324,8 +320,8 @@ export default abstract class Shape {
 
   setTranslation(input: TransformationInput) {
     this.programInfo.uTranslation.value = input;
-    let temp = (this.programInfo.uTranslation.value as number[]);
-    for (let i=0;i<3;i++){
+    let temp = this.programInfo.uTranslation.value as number[];
+    for (let i = 0; i < 3; i++) {
       temp[i] += this.programInfo.anchorPoint[i];
     }
     this.programInfo.uTranslation.value = temp;
@@ -349,38 +345,33 @@ export default abstract class Shape {
     this.programInfo.uDirectionalVector.value = directionalVector;
   }
 
-  setAnchorPoint(anchorPoint: number[]){
-    let temp = (this.programInfo.uTranslation.value as number[]);
-    for (let i=0;i<3;i++){
+  setAnchorPoint(anchorPoint: number[]) {
+    let temp = this.programInfo.uTranslation.value as number[];
+    for (let i = 0; i < 3; i++) {
       temp[i] -= this.programInfo.anchorPoint[i];
     }
     this.programInfo.anchorPoint = anchorPoint;
-    for (let i=0;i<3;i++){
+    for (let i = 0; i < 3; i++) {
       temp[i] += this.programInfo.anchorPoint[i];
     }
     this.programInfo.uTranslation.value = temp;
   }
 
-  addChild(shape: Shape){
+  addChild(shape: Shape) {
     this.children.push(shape);
   }
 
-  getLocalTransformation(): number[]{
-    let ret = [
-      1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, 1
-    ];
-    let trans = (this.programInfo.uTranslation.value as number[]);
+  getLocalTransformation(): number[] {
+    let ret = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    let trans = this.programInfo.uTranslation.value as number[];
     ret = m4.multiply(ret, m4.translation(trans[0], trans[1], trans[2]));
 
-    let rot = (this.programInfo.uRotation.value as number[]);
+    let rot = this.programInfo.uRotation.value as number[];
     ret = m4.xRotate(ret, rot[0]);
     ret = m4.yRotate(ret, rot[1]);
     ret = m4.zRotate(ret, rot[2]);
 
-    let scale = (this.programInfo.uScale.value as number[]);
+    let scale = this.programInfo.uScale.value as number[];
     ret = m4.scale(ret, scale[0], scale[1], scale[2]);
     return ret;
   }

@@ -1,7 +1,5 @@
 import Application from "./classes/Application";
 import Cube from "./classes/Cube";
-import Torus from "./classes/Torus";
-import Prism from "./classes/Prism";
 import { hexToRGB, rgbToHex } from "./utils/color-utils";
 
 import { degToRad, radToDeg } from "./utils/rotate-utils";
@@ -17,10 +15,6 @@ const app = new Application(canvas, gl);
 const cube = new Cube(canvas, gl);
 const cube2 = new Cube(canvas, gl);
 const cube3 = new Cube(canvas, gl);
-
-// console.log(cube.programInfo.uTranslation.value);
-// console.log(cube2.programInfo.uTranslation.value);
-// console.log(cube3.programInfo.uTranslation.value);
 
 cube.addChild(cube2);
 cube2.addChild(cube3);
