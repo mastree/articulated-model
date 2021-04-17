@@ -242,7 +242,17 @@ export default abstract class Shape {
     this.persistUniform(this.programInfo.uViewMatrix);
     this.persistUniform(info.uRotation);
     this.persistUniform(info.uScale);
+
+    // add anchorPoint with translation
+    let trans = [...(this.programInfo.uTranslation.value as number[])];
+    for (let i=0;i<3;i++) trans[i] += this.programInfo.anchorPoint[i]
+    let temp = info.uTranslation.value;
+    info.uTranslation.value = trans;
     this.persistUniform(info.uTranslation);
+    // reset translation
+    info.uTranslation.value = temp;
+    //==============================
+
     this.persistUniform(info.uAncestorsMatrix);
     // lighting
     this.persistUniform(info.uAmbientLight);
@@ -266,11 +276,11 @@ export default abstract class Shape {
 
   setTranslation(input: TransformationInput) {
     this.programInfo.uTranslation.value = input;
-    let temp = this.programInfo.uTranslation.value as number[];
-    for (let i = 0; i < 3; i++) {
-      temp[i] += this.programInfo.anchorPoint[i];
-    }
-    this.programInfo.uTranslation.value = temp;
+    // let temp = this.programInfo.uTranslation.value as number[];
+    // for (let i = 0; i < 3; i++) {
+    //   temp[i] += this.programInfo.anchorPoint[i];
+    // }
+    // this.programInfo.uTranslation.value = temp;
   }
 
   setRotate(input: TransformationInput) {
@@ -292,15 +302,15 @@ export default abstract class Shape {
   }
 
   setAnchorPoint(anchorPoint: number[]) {
-    let temp = this.programInfo.uTranslation.value as number[];
-    for (let i = 0; i < 3; i++) {
-      temp[i] -= this.programInfo.anchorPoint[i];
-    }
+    // let temp = this.programInfo.uTranslation.value as number[];
+    // for (let i = 0; i < 3; i++) {
+    //   temp[i] -= this.programInfo.anchorPoint[i];
+    // }
     this.programInfo.anchorPoint = anchorPoint;
-    for (let i = 0; i < 3; i++) {
-      temp[i] += this.programInfo.anchorPoint[i];
-    }
-    this.programInfo.uTranslation.value = temp;
+    // for (let i = 0; i < 3; i++) {
+    //   temp[i] += this.programInfo.anchorPoint[i];
+    // }
+    // this.programInfo.uTranslation.value = temp;
   }
 
   addChild(shape: Shape) {
@@ -309,7 +319,8 @@ export default abstract class Shape {
 
   getLocalTransformation(): number[] {
     let ret = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-    let trans = this.programInfo.uTranslation.value as number[];
+    let trans = [...(this.programInfo.uTranslation.value as number[])];
+    for (let i=0;i<3;i++) trans[i] += this.programInfo.anchorPoint[i]
     ret = m4.multiply(ret, m4.translation(trans[0], trans[1], trans[2]));
 
     let rot = this.programInfo.uRotation.value as number[];

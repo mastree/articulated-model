@@ -20,12 +20,17 @@ export class TestModel extends Model {
     cube.addChild(cube2);
     cube2.addChild(cube3);
     cube3.addChild(cube4);
+    cube2.setAnchorPoint([2, 2, 2]);
+    cube3.setAnchorPoint([2, 2, 2]);
+    cube4.setAnchorPoint([2, 2, 2]);
     shapes.push(cube);
-    cube2.setAnchorPoint([1, 1, 1]);
     shapes.push(cube2);
-    cube3.setAnchorPoint([1, 1, 1]);
     shapes.push(cube3);
-    cube4.setAnchorPoint([0, 0, 0]);
     shapes.push(cube4);
+
+    console.log(cube.programInfo.uTranslation)
+    console.log(cube2.programInfo.uTranslation)
+    console.log(cube3.programInfo.uTranslation)
+    console.log(cube4.programInfo.uTranslation)
   }
 }

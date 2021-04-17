@@ -8,7 +8,7 @@ import { TestModel } from "./classes/Models/TestModel";
 
 const app = new Application();
 app.models.push(new ChainCube("Chain Cube"));
-// app.models.push(new TestModel("Test Model")); // ! coba uncomment ini lol
+app.models.push(new TestModel("Test Model")); // ! coba uncomment ini lol
 app.setSelectedModel(0);
 
 const render = () => {
