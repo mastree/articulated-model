@@ -5,8 +5,10 @@ import { hexToRGB, rgbToHex } from "@/utils/color-utils";
 
 import { degToRad, radToDeg } from "@/utils/rotate-utils";
 import { TestModel } from "./classes/Models/TestModel";
+import { HumanoidAngel } from "./classes/Models/HumanoidAngel";
 
 const app = new Application();
+app.models.push(new HumanoidAngel("Angel"))
 app.models.push(new ChainCube("Chain Cube"));
 app.models.push(new TestModel("Test Model")); // ! coba uncomment ini lol
 app.setSelectedModel(0);
