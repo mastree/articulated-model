@@ -35,9 +35,9 @@ class Application {
   }
 
   loadDefaults() {
-    for (let i = 0; i < this.shapes.length; i++) {
-      this.shapes[i].loadDefaults();
-    }
+    // for (let i = 0; i < this.shapes.length; i++) {
+    //   this.shapes[i].loadDefaults();
+    // }
     this.camera = { ...CameraDefault };
     this.lighting = { ...LightingDefault };
     this.applyProjection();

@@ -81,21 +81,11 @@ export default abstract class Shape {
       uRotation: [0, 0, 0],
       uScale: [1, 1, 1],
       anchorPoint: [0, 0, 0],
-      uAncestorsMatrix: [
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-      ],
+      uAncestorsMatrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
       uTransformationMatrix: {
         type: "mat4",
         location: gl.getUniformLocation(program, "uTransformationMatrix"),
-        value: [
-          1, 0, 0, 0,
-          0, 1, 0, 0,
-          0, 0, 1, 0,
-          0, 0, 0, 1
-        ]
+        value: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
       },
     };
   }
@@ -222,8 +212,11 @@ export default abstract class Shape {
     this.persistUniform(info.uProjectionMatrix);
     this.persistUniform(this.programInfo.uViewMatrix);
 
-    this.programInfo.uTransformationMatrix.value = m4.multiply((info.uAncestorsMatrix as number[]), this.getLocalTransformation())
-    this.persistUniform(this.programInfo.uTransformationMatrix)
+    this.programInfo.uTransformationMatrix.value = m4.multiply(
+      info.uAncestorsMatrix as number[],
+      this.getLocalTransformation()
+    );
+    this.persistUniform(this.programInfo.uTransformationMatrix);
 
     // lighting
     this.persistUniform(info.uAmbientLight);
@@ -253,6 +246,30 @@ export default abstract class Shape {
     this.programInfo.uRotation = input;
   }
 
+  rotate(rot: number[]) {
+    let rotMat = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    rotMat = m4.xRotate(rotMat, rot[0]);
+    rotMat = m4.yRotate(rotMat, rot[1]);
+    rotMat = m4.zRotate(rotMat, rot[2]);
+    console.log(rotMat);
+    let temp: number[][] = [];
+    let curNode = this.programInfo.aVertexPosition.value as number[];
+    for (let i = 0; i < curNode.length; i++) {
+      if (i % 3 == 0) temp.push([]);
+      temp[temp.length - 1].push(curNode[i]);
+    }
+    for (let i = 0; i < temp.length; i++) {
+      let nval = [0, 0, 0];
+      for (let j = 0; j < 3; j++) {
+        for (let k = 0; k < 3; k++) {
+          nval[j] += temp[i][k] * rotMat[k * 4 + j];
+        }
+      }
+      temp[i] = nval;
+    }
+    this.programInfo.aVertexPosition.value = temp.flat();
+  }
+
   setScale(input: TransformationInput) {
     this.programInfo.uScale = input;
   }
@@ -278,7 +295,7 @@ export default abstract class Shape {
   getLocalTransformation(): number[] {
     let ret = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
     let trans = [...(this.programInfo.uTranslation as number[])];
-    for (let i=0;i<3;i++) trans[i] += this.programInfo.anchorPoint[i]
+    for (let i = 0; i < 3; i++) trans[i] += this.programInfo.anchorPoint[i];
     ret = m4.multiply(ret, m4.translation(trans[0], trans[1], trans[2]));
 
     let rot = this.programInfo.uRotation as number[];

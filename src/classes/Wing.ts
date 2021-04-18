@@ -22,7 +22,11 @@ export const genCubeVertices = (center: Vec3, size: Vec3): Vec3[] => {
     [center[0] - halfSize[0], center[1] + halfSize[1], center[2] + halfSize[2]],
   ]
 };
-export const genWingVertices = (center: Vec3, size: Vec3, right: boolean): Vec3[] => {
+export const genWingVertices = (
+  center: Vec3,
+  size: Vec3,
+  right: boolean
+): Vec3[] => {
   const halfSize = size.map((s) => s / 2);
   // prettier-ignore
   if (right){
@@ -108,12 +112,18 @@ type CubeConfig = {
 export class Wing extends Shape {
   indexBuffer: WebGLBuffer | null;
 
-  constructor(name: string = "Default Cube Name", rightWing: boolean, cubeConfig?: CubeConfig) {
+  constructor(
+    name: string = "Default Cube Name",
+    rightWing: boolean,
+    cubeConfig?: CubeConfig
+  ) {
     super(cubeVertexShader, cubeFragmentShader, name);
     const vertices: number[] = cubeConfig
       ? cubeConfig.vertices
         ? toGlVertices(cubeConfig.vertices)
-        : toGlVertices(genWingVertices(cubeConfig.center!, cubeConfig.size!, rightWing))
+        : toGlVertices(
+            genWingVertices(cubeConfig.center!, cubeConfig.size!, rightWing)
+          )
       : toGlVertices(genWingVertices([0, 0, 0], [2, 2, 2], rightWing));
     const faceColors = [
       [1.0, 1.0, 1.0, 1.0], // Front face: white
@@ -221,30 +231,6 @@ export class Wing extends Shape {
     this.programInfo.uTranslation = CubeDefault.uTranslation;
     this.programInfo.uScale = CubeDefault.uScale;
     this.programInfo.uRotation = CubeDefault.uRotation;
-  }
-
-  rotate(rot: number[]){
-    let rotMat = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-    rotMat = m4.xRotate(rotMat, rot[0]);
-    rotMat = m4.yRotate(rotMat, rot[1]);
-    rotMat = m4.zRotate(rotMat, rot[2]);
-    console.log(rotMat);
-    let temp: number[][] = [];
-    let curNode = this.programInfo.aVertexPosition.value as number[];
-    for (let i=0;i<curNode.length;i++){
-        if (i % 3 == 0) temp.push([]);
-        temp[temp.length - 1].push(curNode[i])
-    }
-    for (let i=0;i<temp.length;i++){
-        let nval = [0, 0, 0];
-        for (let j=0;j<3;j++){
-            for (let k=0;k<3;k++){
-                nval[j] += temp[i][k] * rotMat[k * 4 + j]; 
-            }
-        }
-        temp[i] = nval;
-    }
-    this.programInfo.aVertexPosition.value = temp.flat();
   }
 
   render() {

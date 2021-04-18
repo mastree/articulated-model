@@ -6,11 +6,12 @@ import { hexToRGB, rgbToHex } from "@/utils/color-utils";
 import { degToRad, radToDeg } from "@/utils/rotate-utils";
 import { TestModel } from "./classes/Models/TestModel";
 import { HumanoidAngel } from "./classes/Models/HumanoidAngel";
+import { Spider } from "./classes/Models/Spider";
 
 const app = new Application();
-app.models.push(new HumanoidAngel("Angel"))
-app.models.push(new ChainCube("Chain Cube"));
-app.models.push(new TestModel("Test Model")); // ! coba uncomment ini lol
+// app.models.push(new HumanoidAngel("Angel"));
+app.models.push(new Spider("Spider"));
+// app.models.push(new ChainCube("Chain Cube"));
 app.setSelectedModel(0);
 
 const render = () => {
@@ -132,7 +133,7 @@ const changeShape = (shapeIndex: number) => {
   for (let i = 0; i < 3; i++) {
     const { programInfo } = app.selectedShape;
     const { uTranslation, uRotation, uScale } = programInfo;
-    
+
     translationSliders[i].nextElementSibling!.innerHTML = translationSliders[
       i
     ].value = uTranslation[i].toString() ?? "";
@@ -174,6 +175,7 @@ projectionSelector.onchange = () => {
   });
   document.getElementById(`${projectionSelector.value}Slider`)!.hidden = false;
 };
+app.setProjection(projectionSelector.value as Projection);
 
 const cameraRadiusSlider = document.getElementById(
   "camera-radius"
