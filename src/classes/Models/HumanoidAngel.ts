@@ -1,5 +1,7 @@
 import { Cube } from "@/classes/Cube";
+import { Wing } from "@/classes/Wing";
 import { Model } from "@/classes/Models/Model";
+import { degToRad } from "@/utils/rotate-utils";
 
 export class HumanoidAngel extends Model {
   constructor(name: string) {
@@ -9,29 +11,6 @@ export class HumanoidAngel extends Model {
 
   createModel() {
     const { shapes } = this;
-    // const cube = new Cube("First Cube", {
-    //   center: [0, 0, 0],
-    //   size: [2, 2, 2],
-    // });
-    // const cube2 = new Cube("Second Cube");
-    // const cube3 = new Cube("Third Cube");
-    // const cube4 = new Cube("Fourth Cube");
-
-    // cube.addChild(cube2);
-    // cube2.addChild(cube3);
-    // cube3.addChild(cube4);
-    // cube2.setAnchorPoint([2, 2, 2]);
-    // cube3.setAnchorPoint([2, 2, 2]);
-    // cube4.setAnchorPoint([2, 2, 2]);
-    // shapes.push(cube);
-    // shapes.push(cube2);
-    // shapes.push(cube3);
-    // shapes.push(cube4);
-
-    // console.log(cube.programInfo.uTranslation)
-    // console.log(cube2.programInfo.uTranslation)
-    // console.log(cube3.programInfo.uTranslation)
-    // console.log(cube4.programInfo.uTranslation)
     const body = new Cube("Body", {
         center: [0, 0, 0],
         size: [1.5, 2, 0.5],
@@ -43,12 +22,6 @@ export class HumanoidAngel extends Model {
     head.setAnchorPoint([0, 1.1, 0]);
     body.addChild(head);
 
-    // const leftArm = new Cube("Left-Arm", {
-    //     center: [0, -1, 0],
-    //     size: [0.5, 2, 0.5],
-    // })
-    // leftArm.setAnchorPoint([-1.1, 1, 0]);
-    // body.addChild(leftArm);
     const upperLeftArm = new Cube("Upper-Left-Arm", {
         center: [0, -0.6, 0],
         size: [0.5, 1.2, 0.5],
@@ -63,12 +36,6 @@ export class HumanoidAngel extends Model {
     lowerLeftArm.setAnchorPoint([0, -1.2, 0]);
     upperLeftArm.addChild(lowerLeftArm);
 
-    // const rightArm = new Cube("Right-Arm", {
-    //     center: [0, -1, 0],
-    //     size: [0.5, 2, 0.5],
-    // })
-    // rightArm.setAnchorPoint([1.1, 1, 0]);
-    // body.addChild(rightArm);
     const upperRightArm = new Cube("Upper-Right-Arm", {
         center: [0, -0.6, 0],
         size: [0.5, 1.2, 0.5],
@@ -83,13 +50,6 @@ export class HumanoidAngel extends Model {
     lowerRightArm.setAnchorPoint([0, -1.2, 0]);
     upperRightArm.addChild(lowerRightArm);
 
-
-    // const leftLeg = new Cube("Left-Leg", {
-    //     center: [0, -1.35, 0],
-    //     size: [0.6, 2.7, 0.5],
-    // })
-    // leftLeg.setAnchorPoint([-0.5, -1.1, 0]);
-    // body.addChild(leftLeg);
     const upperLeftLeg = new Cube("Upper-Left-Leg", {
         center: [0, -0.75, 0],
         size: [0.6, 1.5, 0.5],
@@ -104,12 +64,6 @@ export class HumanoidAngel extends Model {
     lowerLeftLeg.setAnchorPoint([0, -1.5, 0]);
     upperLeftLeg.addChild(lowerLeftLeg);
 
-    // const rightLeg = new Cube("Right-Leg", {
-    //     center: [0, -1.35, 0],
-    //     size: [0.6, 2.7, 0.5],
-    // })
-    // rightLeg.setAnchorPoint([0.5, -1.1, 0]);
-    // body.addChild(rightLeg);
     const upperRightLeg = new Cube("Upper-Right-Leg", {
         center: [0, -0.75, 0],
         size: [0.6, 1.5, 0.5],
@@ -123,6 +77,22 @@ export class HumanoidAngel extends Model {
     })
     lowerRightLeg.setAnchorPoint([0, -1.5, 0]);
     upperRightLeg.addChild(lowerRightLeg);
+
+    const leftWing = new Wing("Left-Wing", false, {
+        center: [-1.5, 0.75, 0],
+        size: [3, 1.5, 0.2],
+    })
+    leftWing.setAnchorPoint([-0.35, 0.8, -0.5]);
+    leftWing.rotate([degToRad(-3), degToRad(-66), degToRad(73)]);
+    body.addChild(leftWing);
+
+    const rightWing = new Wing("Right-Wing", true, {
+        center: [1.5, 0.75, 0],
+        size: [3, 1.5, 0.2],
+    })
+    rightWing.setAnchorPoint([0.35, 0.8, -0.5]);
+    rightWing.rotate([degToRad(-3), degToRad(66), degToRad(-73)]);
+    body.addChild(rightWing);
 
     shapes.push(body);
     shapes.push(head);
@@ -138,5 +108,9 @@ export class HumanoidAngel extends Model {
     shapes.push(lowerLeftLeg)
     shapes.push(upperRightLeg);
     shapes.push(lowerRightLeg);
+
+    // wings
+    shapes.push(leftWing);
+    shapes.push(rightWing);
   }
 }
