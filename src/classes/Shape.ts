@@ -57,21 +57,6 @@ export default abstract class Shape {
           0, 0, 0, 1
         ],
       },
-      uTranslation: {
-        type: "vec3",
-        location: gl.getUniformLocation(program, "uTranslation"),
-        value: [0, 0, 0],
-      },
-      uRotation: {
-        type: "vec3",
-        location: gl.getUniformLocation(program, "uRotation"),
-        value: [0, 0, 0],
-      },
-      uScale: {
-        type: "vec3",
-        location: gl.getUniformLocation(program, "uScale"),
-        value: [1, 1, 1],
-      },
       uAmbientLight: {
         type: "vec3",
         location: gl.getUniformLocation(program, "uAmbientLight"),
@@ -92,17 +77,25 @@ export default abstract class Shape {
         location: gl.getUniformLocation(program, "uLightingOn"),
         value: true,
       },
-      anchorPoint: [0, 0, 0] as number[],
-      uAncestorsMatrix: {
+      uTranslation: [0, 0, 0],
+      uRotation: [0, 0, 0],
+      uScale: [1, 1, 1],
+      anchorPoint: [0, 0, 0],
+      uAncestorsMatrix: [
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+      ],
+      uTransformationMatrix: {
         type: "mat4",
-        location: gl.getUniformLocation(program, "uAncestorsMatrix"),
-        // prettier-ignore
+        location: gl.getUniformLocation(program, "uTransformationMatrix"),
         value: [
           1, 0, 0, 0,
           0, 1, 0, 0,
           0, 0, 1, 0,
           0, 0, 0, 1
-        ],
+        ]
       },
     };
   }
@@ -143,21 +136,6 @@ export default abstract class Shape {
         // prettier-ignore
         value: data.programInfo.uViewMatrix.value,
       },
-      uTranslation: {
-        type: "vec3",
-        location: gl.getUniformLocation(program, "uTranslation"),
-        value: data.programInfo.uTranslation.value,
-      },
-      uRotation: {
-        type: "vec3",
-        location: gl.getUniformLocation(program, "uRotation"),
-        value: data.programInfo.uRotation.value,
-      },
-      uScale: {
-        type: "vec3",
-        location: gl.getUniformLocation(program, "uScale"),
-        value: data.programInfo.uScale.value,
-      },
       uAmbientLight: {
         type: "vec3",
         location: gl.getUniformLocation(program, "uAmbientLight"),
@@ -178,12 +156,15 @@ export default abstract class Shape {
         location: gl.getUniformLocation(program, "uLightingOn"),
         value: data.programInfo.uLightingOn.value,
       },
+      uTranslation: data.programInfo.uTranslation,
+      uRotation: data.programInfo.uRotation,
+      uScale: data.programInfo.uScale,
       anchorPoint: data.programInfo.anchorPoint,
-      uAncestorsMatrix: {
+      uAncestorsMatrix: data.programInfo.uAncestorsMatrix,
+      uTransformationMatrix: {
         type: "mat4",
-        location: gl.getUniformLocation(program, "uAncestorsMatrix"),
-        // prettier-ignore
-        value: data.programInfo.uAncestorsMatrix.value,
+        location: gl.getUniformLocation(program, "uTransformationMatrix"),
+        value: data.programInfo.uTransformationMatrix.value,
       },
     };
 
@@ -240,20 +221,10 @@ export default abstract class Shape {
     // transformation
     this.persistUniform(info.uProjectionMatrix);
     this.persistUniform(this.programInfo.uViewMatrix);
-    this.persistUniform(info.uRotation);
-    this.persistUniform(info.uScale);
 
-    // add anchorPoint with translation
-    let trans = [...(this.programInfo.uTranslation.value as number[])];
-    for (let i=0;i<3;i++) trans[i] += this.programInfo.anchorPoint[i]
-    let temp = info.uTranslation.value;
-    info.uTranslation.value = trans;
-    this.persistUniform(info.uTranslation);
-    // reset translation
-    info.uTranslation.value = temp;
-    //==============================
+    this.programInfo.uTransformationMatrix.value = m4.multiply((info.uAncestorsMatrix as number[]), this.getLocalTransformation())
+    this.persistUniform(this.programInfo.uTransformationMatrix)
 
-    this.persistUniform(info.uAncestorsMatrix);
     // lighting
     this.persistUniform(info.uAmbientLight);
     this.persistUniform(info.uDirectionalVector);
@@ -275,20 +246,15 @@ export default abstract class Shape {
   }
 
   setTranslation(input: TransformationInput) {
-    this.programInfo.uTranslation.value = input;
-    // let temp = this.programInfo.uTranslation.value as number[];
-    // for (let i = 0; i < 3; i++) {
-    //   temp[i] += this.programInfo.anchorPoint[i];
-    // }
-    // this.programInfo.uTranslation.value = temp;
+    this.programInfo.uTranslation = input;
   }
 
   setRotate(input: TransformationInput) {
-    this.programInfo.uRotation.value = input;
+    this.programInfo.uRotation = input;
   }
 
   setScale(input: TransformationInput) {
-    this.programInfo.uScale.value = input;
+    this.programInfo.uScale = input;
   }
 
   setLightingConfig(
@@ -302,15 +268,7 @@ export default abstract class Shape {
   }
 
   setAnchorPoint(anchorPoint: number[]) {
-    // let temp = this.programInfo.uTranslation.value as number[];
-    // for (let i = 0; i < 3; i++) {
-    //   temp[i] -= this.programInfo.anchorPoint[i];
-    // }
     this.programInfo.anchorPoint = anchorPoint;
-    // for (let i = 0; i < 3; i++) {
-    //   temp[i] += this.programInfo.anchorPoint[i];
-    // }
-    // this.programInfo.uTranslation.value = temp;
   }
 
   addChild(shape: Shape) {
@@ -319,16 +277,16 @@ export default abstract class Shape {
 
   getLocalTransformation(): number[] {
     let ret = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-    let trans = [...(this.programInfo.uTranslation.value as number[])];
+    let trans = [...(this.programInfo.uTranslation as number[])];
     for (let i=0;i<3;i++) trans[i] += this.programInfo.anchorPoint[i]
     ret = m4.multiply(ret, m4.translation(trans[0], trans[1], trans[2]));
 
-    let rot = this.programInfo.uRotation.value as number[];
+    let rot = this.programInfo.uRotation as number[];
     ret = m4.xRotate(ret, rot[0]);
     ret = m4.yRotate(ret, rot[1]);
     ret = m4.zRotate(ret, rot[2]);
 
-    let scale = this.programInfo.uScale.value as number[];
+    let scale = this.programInfo.uScale as number[];
     ret = m4.scale(ret, scale[0], scale[1], scale[2]);
     return ret;
   }

@@ -42,12 +42,9 @@ type ProgramInfo = {
   aVertexPosition: GLAttribute;
   aVertexNormal: GLAttribute;
   aVertexColor: GLAttribute;
-  uTranslation: GLUniform;
-  uRotation: GLUniform;
-  uScale: GLUniform;
   uProjectionMatrix: GLUniform;
   uViewMatrix: GLUniform;
-
+  
   uAmbientLight: GLUniform;
   uDirectionalVector: GLUniform;
   uDirectionalLightColor: GLUniform;
@@ -55,8 +52,12 @@ type ProgramInfo = {
   // Kalo perlu yang beda di child class, tambah aja di bawah sini@
   optionalAttribute?: GLAttribute;
   optionalUniform?: GLUniform;
-
+  
   // For articulation
+  uTranslation: number[];
+  uRotation: number[];
+  uScale: number[];
   anchorPoint: number[]; // length 3 (3D point)
-  uAncestorsMatrix: GLUniform;
+  uAncestorsMatrix: number[];
+  uTransformationMatrix: GLUniform;
 };

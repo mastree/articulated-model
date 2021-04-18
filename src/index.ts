@@ -130,21 +130,15 @@ const changeShape = (shapeIndex: number) => {
   for (let i = 0; i < 3; i++) {
     const { programInfo } = app.selectedShape;
     const { uTranslation, uRotation, uScale } = programInfo;
-    if (
-      uTranslation.type == "bool" ||
-      uRotation.type == "bool" ||
-      uScale.type == "bool"
-    ) {
-      continue;
-    }
+    
     translationSliders[i].nextElementSibling!.innerHTML = translationSliders[
       i
-    ].value = uTranslation.value[i].toString() ?? "";
+    ].value = uTranslation[i].toString() ?? "";
     rotationSliders[i]!.nextElementSibling!.innerHTML = rotationSliders[
       i
-    ].value = radToDeg(uRotation.value[i]).toString() ?? "";
+    ].value = radToDeg(uRotation[i]).toString() ?? "";
     scaleSliders[i]!.nextElementSibling!.innerHTML = scaleSliders[i].value =
-      uScale.value[i].toString() ?? "";
+      uScale[i].toString() ?? "";
   }
 };
 changeShape(0); // 0 is cube

@@ -190,9 +190,9 @@ export class Cube extends Shape {
   }
 
   loadDefaults() {
-    this.programInfo.uTranslation.value = CubeDefault.uTranslation;
-    this.programInfo.uScale.value = CubeDefault.uScale;
-    this.programInfo.uRotation.value = CubeDefault.uRotation;
+    this.programInfo.uTranslation = CubeDefault.uTranslation;
+    this.programInfo.uScale = CubeDefault.uScale;
+    this.programInfo.uRotation = CubeDefault.uRotation;
   }
 
   render() {
@@ -208,7 +208,7 @@ export class Cube extends Shape {
   renderWith(addTrans: number[]) {
     const { program } = this;
 
-    this.programInfo.uAncestorsMatrix.value = addTrans;
+    this.programInfo.uAncestorsMatrix = addTrans;
     this.persistVars();
 
     gl.useProgram(program);
