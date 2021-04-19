@@ -110,11 +110,12 @@ export class HumanoidAngel extends Model {
     // Body Animation
     body.setAnimationConfig({
         rotation: [
+            {offset: 20, min: 0, max: 0},
+            {offset: 0, min: -160, max: 160},
             {offset: 10, min: 0, max: 0},
-            DefaultSubConfig,
-            DefaultSubConfig,
         ],
     });
+    body.setAnimationSpeed(0.03);
 
     // Body Animation
     head.setAnimationConfig({
