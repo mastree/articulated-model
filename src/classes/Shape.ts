@@ -6,6 +6,15 @@ export default abstract class Shape {
   program: WebGLProgram;
   programInfo: ProgramInfo;
   children: Shape[] = [];
+  animate: boolean = true; // TODO: set defaultnya false, bikin toggler
+  animationConfig: AnimationConfig = {
+    rotation: [
+      { offset: 0, min: 0, max: 0 },
+      { offset: 0, min: 0, max: 0 },
+      { offset: 0, min: 0, max: 0 },
+    ],
+  };
+  scaledTime: number = 0;
 
   constructor(
     vertexShader: string,
@@ -38,24 +47,12 @@ export default abstract class Shape {
       uProjectionMatrix: {
         type: "mat4",
         location: gl.getUniformLocation(program, "uProjectionMatrix"),
-        // prettier-ignore
-        value: [
-          1, 0, 0, 0,
-          0, 1, 0, 0,
-          0, 0, 1, 0,
-          0, 0, 0, 1
-        ],
+        value: m4.identity(),
       },
       uViewMatrix: {
         type: "mat4",
         location: gl.getUniformLocation(program, "uViewMatrix"),
-        // prettier-ignore
-        value: [
-          1, 0, 0, 0,
-          0, 1, 0, 0,
-          0, 0, 1, 0,
-          0, 0, 0, 1
-        ],
+        value: m4.identity(),
       },
       uAmbientLight: {
         type: "vec3",
@@ -81,11 +78,11 @@ export default abstract class Shape {
       uRotation: [0, 0, 0],
       uScale: [1, 1, 1],
       anchorPoint: [0, 0, 0],
-      uAncestorsMatrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+      uAncestorsMatrix: m4.identity(),
       uTransformationMatrix: {
         type: "mat4",
         location: gl.getUniformLocation(program, "uTransformationMatrix"),
-        value: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+        value: m4.identity(),
       },
     };
   }
@@ -117,13 +114,11 @@ export default abstract class Shape {
       uProjectionMatrix: {
         type: "mat4",
         location: gl.getUniformLocation(program, "uProjectionMatrix"),
-        // prettier-ignore
         value: data.programInfo.uProjectionMatrix.value,
       },
       uViewMatrix: {
         type: "mat4",
         location: gl.getUniformLocation(program, "uViewMatrix"),
-        // prettier-ignore
         value: data.programInfo.uViewMatrix.value,
       },
       uAmbientLight: {
@@ -247,7 +242,7 @@ export default abstract class Shape {
   }
 
   rotate(rot: number[]) {
-    let rotMat = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    let rotMat = m4.identity();
     rotMat = m4.xRotate(rotMat, rot[0]);
     rotMat = m4.yRotate(rotMat, rot[1]);
     rotMat = m4.zRotate(rotMat, rot[2]);
@@ -268,6 +263,17 @@ export default abstract class Shape {
       temp[i] = nval;
     }
     this.programInfo.aVertexPosition.value = temp.flat();
+  }
+
+  setAnimationConfig(config: AnimationConfig) {
+    this.animationConfig = { ...config };
+  }
+
+  addTime(delta: number) {
+    const speedEuy = 0.5;
+    this.scaledTime += delta * speedEuy;
+    this.scaledTime %= 720;
+    if (this.scaledTime < 0) this.scaledTime += 720;
   }
 
   setScale(input: TransformationInput) {

@@ -14,8 +14,11 @@ app.models.push(new Spider("Spider"));
 // app.models.push(new ChainCube("Chain Cube"));
 app.setSelectedModel(0);
 
-const render = () => {
-  app.articulateRender();
+let prev = Date.now();
+const render = (time: number) => {
+  const delta = time - prev;
+  app.articulateRender(delta);
+  prev = time;
   window.requestAnimationFrame(render);
 };
 window.requestAnimationFrame(render);

@@ -2,6 +2,7 @@ import { Cube } from "@/classes/Cube";
 import { Wing } from "@/classes/Wing";
 import { Model } from "@/classes/Models/Model";
 import { degToRad, vDegToRad } from "@/utils/rotate-utils";
+import { DefaultSubConfig } from "@/utils/animate-utils";
 
 export class Spider extends Model {
   constructor(name: string) {
@@ -16,10 +17,24 @@ export class Spider extends Model {
       center: [0, 0, 0],
       size: headSize,
     });
+    head.setAnimationConfig({
+      rotation: [
+        { offset: 0, min: -10, max: 10 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
+    });
     const neckSize: Vec3 = [1, 1, 1];
     const neck = new Cube("Neck", {
       center: [0, 0, 0],
       size: neckSize,
+    });
+    neck.setAnimationConfig({
+      rotation: [
+        DefaultSubConfig,
+        { offset: 0, min: -10, max: 10 },
+        DefaultSubConfig,
+      ],
     });
     const bodySize: Vec3 = [2, 2, 3.5];
     const body = new Cube("Body", {
@@ -35,12 +50,30 @@ export class Spider extends Model {
       });
       leftLegs.push(curLeg);
       body.addChild(curLeg);
+      body.setAnimationConfig({
+        rotation: [
+          DefaultSubConfig,
+          { offset: -60, min: 0, max: 0 },
+          DefaultSubConfig,
+        ],
+      });
       curLeg.setAnchorPoint([
         bodySize[0] / 2 + legSize[0] / 2 - 0.5,
         -1,
         i - 2,
       ]);
       curLeg.rotate(vDegToRad([0, (i - 2) * -30, -15]));
+      curLeg.setAnimationConfig({
+        rotation: [
+          DefaultSubConfig,
+          DefaultSubConfig,
+          {
+            offset: 0,
+            min: i % 2 == 0 ? 10 : -10,
+            max: i % 2 == 0 ? -10 : 10,
+          },
+        ],
+      });
     }
     const rightLegs: Cube[] = [];
     for (let i = 1; i <= 4; i++) {
@@ -56,6 +89,17 @@ export class Spider extends Model {
         i - 2,
       ]);
       curLeg.rotate(vDegToRad([0, (i - 2) * 30, 15]));
+      curLeg.setAnimationConfig({
+        rotation: [
+          DefaultSubConfig,
+          DefaultSubConfig,
+          {
+            offset: 0,
+            min: i % 2 == 0 ? -10 : 10,
+            max: i % 2 == 0 ? 10 : -10,
+          },
+        ],
+      });
     }
     body.setRotate(vDegToRad([0, -60, 0]));
     body.addChild(neck);

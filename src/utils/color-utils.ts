@@ -6,11 +6,11 @@ export function hexToRGB(hexadec: string) {
     parseInt(hexadec_r, 16) / 255,
     parseInt(hexadec_g, 16) / 255,
     parseInt(hexadec_b, 16) / 255,
-  ] as Color;
+  ] as Vec3;
   return color_arr;
 }
 
-export function rgbToHex(rgb: Color) {
+export function rgbToHex(rgb: Vec3) {
   const hexStr = [
     Math.round(rgb[0] * 255).toString(16),
     Math.round(rgb[1] * 255).toString(16),

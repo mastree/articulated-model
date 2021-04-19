@@ -178,7 +178,7 @@ class Application {
     }
   }
 
-  articulateRender() {
+  articulateRender(delta: number) {
     gl.clearDepth(1.0);
     gl.clearColor(1, 1, 1, 1.0);
     gl.enable(gl.DEPTH_TEST);
@@ -193,14 +193,15 @@ class Application {
 
     this.applyLighting();
     let ident = m4.identity();
-    this.articulateRenderDfs(this.shapes[0], ident);
+    this.articulateRenderDfs(delta, this.shapes[0], ident);
   }
 
-  articulateRenderDfs(node: Shape, ancestorsMat: number[]) {
+  articulateRenderDfs(delta: number, node: Shape, ancestorsMat: number[]) {
+    node.addTime(delta);
     node.renderWith(ancestorsMat);
     let nanc = m4.multiply([...ancestorsMat], node.getLocalTransformation());
     for (const child of node.children) {
-      this.articulateRenderDfs(child, nanc);
+      this.articulateRenderDfs(delta, child, nanc);
     }
   }
 
