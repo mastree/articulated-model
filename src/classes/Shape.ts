@@ -7,6 +7,7 @@ export default abstract class Shape {
   programInfo: ProgramInfo;
   children: Shape[] = [];
   animate: boolean = true; // TODO: set defaultnya false, bikin toggler
+  animationSpeed: number = 0.5;
   animationConfig: AnimationConfig = {
     rotation: [
       { offset: 0, min: 0, max: 0 },
@@ -15,6 +16,12 @@ export default abstract class Shape {
     ],
   };
   scaledTime: number = 0;
+  // animationCycle = {
+  //   size: 1,
+  //   minAnimate: 0,
+  //   maxAnimate: 0,
+  // };
+  // curCycle = 0;
 
   constructor(
     vertexShader: string,
@@ -269,9 +276,12 @@ export default abstract class Shape {
     this.animationConfig = { ...config };
   }
 
+  setAnimationSpeed(nSpeed: number){
+    this.animationSpeed = nSpeed;
+  }
+
   addTime(delta: number) {
-    const speedEuy = 0.5;
-    this.scaledTime += delta * speedEuy;
+    this.scaledTime += delta * this.animationSpeed;
     this.scaledTime %= 720;
     if (this.scaledTime < 0) this.scaledTime += 720;
   }

@@ -9,7 +9,7 @@ import { HumanoidAngel } from "./classes/Models/HumanoidAngel";
 import { Spider } from "./classes/Models/Spider";
 
 const app = new Application();
-// app.models.push(new HumanoidAngel("Angel"));
+app.models.push(new HumanoidAngel("Angel"));
 app.models.push(new Spider("Spider"));
 // app.models.push(new ChainCube("Chain Cube"));
 app.setSelectedModel(0);

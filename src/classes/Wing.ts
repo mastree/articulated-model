@@ -1,11 +1,11 @@
 import { cubeVertexShader } from "../shader/vertex";
 import { cubeFragmentShader } from "../shader/fragment";
-import { degToRad } from "../utils/rotate-utils";
+import { degToRad, vDegToRad } from "../utils/rotate-utils";
 import Shape from "./Shape";
 import { CubeDefault, imageSize, image, texPos } from "../constant";
 import vector from "../utils/vector-utils";
 import { gl } from "../sauce";
-import m4 from "../utils/m4-utils";
+import { cycleTimeToRange } from "@/utils/animate-utils";
 
 // generate 8 vertices
 export const genCubeVertices = (center: Vec3, size: Vec3): Vec3[] => {
@@ -244,6 +244,16 @@ export class Wing extends Shape {
   }
 
   renderWith(addTrans: number[]) {
+    if (this.animate) {
+      const { animationConfig: config } = this;
+      this.setRotate(
+        vDegToRad(
+          config.rotation.map(
+            (e) => e.offset + cycleTimeToRange(this.scaledTime, e.min, e.max)
+          ) as Vec3
+        )
+      );
+    }
     const { program } = this;
 
     this.programInfo.uAncestorsMatrix = addTrans;
