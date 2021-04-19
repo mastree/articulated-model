@@ -7,10 +7,12 @@ import { degToRad, radToDeg } from "@/utils/rotate-utils";
 import { TestModel } from "./classes/Models/TestModel";
 import { HumanoidAngel } from "./classes/Models/HumanoidAngel";
 import { Spider } from "./classes/Models/Spider";
+import { Elephant } from "./classes/Models/Elephant";
 
 const app = new Application();
 app.models.push(new HumanoidAngel("Angel"));
 app.models.push(new Spider("Spider"));
+app.models.push(new Elephant("Elephant"));
 // app.models.push(new ChainCube("Chain Cube"));
 app.setSelectedModel(0);
 
