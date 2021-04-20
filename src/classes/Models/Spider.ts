@@ -74,6 +74,7 @@ export class Spider extends Model {
           },
         ],
       });
+      curLeg.setAnimationSpeed(0.7);
     }
     const rightLegs: Cube[] = [];
     for (let i = 1; i <= 4; i++) {
@@ -100,9 +101,18 @@ export class Spider extends Model {
           },
         ],
       });
+      curLeg.setAnimationSpeed(0.7);
     }
     body.setRotate(vDegToRad([0, -60, 0]));
     body.addChild(neck);
+    body.setAnimationConfig({
+      rotation: [
+        { offset: 20, min: 0, max: 0 },
+        { offset: 0, min: -160, max: 160 },
+        { offset: 10, min: 0, max: 0 },
+      ],
+    });
+    body.setAnimationSpeed(0.03);
     neck.setAnchorPoint([0, -0.25, bodySize[2] / 2 + neckSize[2] / 2]);
     neck.addChild(head);
     head.setAnchorPoint([0, 0, neckSize[2] / 2 + headSize[2] / 2 - 0.5]);

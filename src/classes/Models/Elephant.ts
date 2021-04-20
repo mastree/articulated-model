@@ -48,62 +48,78 @@ export class Elephant extends Model {
       size: bodySize,
     });
     body.setAnimationConfig({
-        rotation: [
-            DefaultSubConfig,
-            { offset: -40, min: 0, max: 0 },
-            DefaultSubConfig,
-        ],
+      rotation: [
+        DefaultSubConfig,
+        { offset: -40, min: 0, max: 0 },
+        DefaultSubConfig,
+      ],
     });
-    
-    body.setAnchorPoint([1, 1, 1])
+
+    body.setAnchorPoint([1, 1, 1]);
     body.addChild(neck);
+    body.setAnimationConfig({
+      rotation: [
+        { offset: 20, min: 0, max: 0 },
+        { offset: 0, min: -160, max: 160 },
+        { offset: 10, min: 0, max: 0 },
+      ],
+    });
+    body.setAnimationSpeed(0.03);
     neck.setAnchorPoint([0, 0.5, bodySize[2] / 2 + neckSize[2] / 2]);
     neck.addChild(head);
     head.setAnchorPoint([0, 0, neckSize[2] / 2 + headSize[2] / 2 - 0.5]);
-    
+
     // Ear
     const earSize: Vec3 = [2.1, 3, 0.5];
     const leftEar = new Cube("LeftEar", {
-        center: [0, -earSize[1] / 2, 0],
-        size: earSize,
+      center: [0, -earSize[1] / 2, 0],
+      size: earSize,
     });
     leftEar.setAnimationConfig({
-        rotation: [
-            { offset: -15, min: 0, max: 15 },
-            { offset: 30, min: -10, max: 20},
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: -15, min: 0, max: 15 },
+        { offset: 30, min: -10, max: 20 },
+        DefaultSubConfig,
+      ],
     });
     const rightEar = new Cube("RightEar", {
-        center: [0, -earSize[1] / 2, 0],
-        size: earSize,
+      center: [0, -earSize[1] / 2, 0],
+      size: earSize,
     });
     rightEar.setAnimationConfig({
-        rotation: [
-            { offset: -15, min: 0, max: 15 },
-            { offset: -30, min: -10, max: 20},
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: -15, min: 0, max: 15 },
+        { offset: -30, min: -10, max: 20 },
+        DefaultSubConfig,
+      ],
     });
 
     head.addChild(leftEar);
-    leftEar.setAnchorPoint([headSize[0] * 4 / 5, headSize[1] / 2, -headSize[2] / 2]);
+    leftEar.setAnchorPoint([
+      (headSize[0] * 4) / 5,
+      headSize[1] / 2,
+      -headSize[2] / 2,
+    ]);
     head.addChild(rightEar);
-    rightEar.setAnchorPoint([-headSize[0] * 4 / 5, headSize[1] / 2, -headSize[2] / 2]);
+    rightEar.setAnchorPoint([
+      (-headSize[0] * 4) / 5,
+      headSize[1] / 2,
+      -headSize[2] / 2,
+    ]);
 
     // Trunk
     const trunkSize: Vec3 = [0.5, 1.5, 0.5];
-    const trunk: Cube[] = []
+    const trunk: Cube[] = [];
     const trunk1 = new Cube("Trunk1", {
-        center: [0, -trunkSize[1] / 2, 0],
-        size: trunkSize,
+      center: [0, -trunkSize[1] / 2, 0],
+      size: trunkSize,
     });
     trunk1.setAnimationConfig({
-        rotation: [
-            { offset: 0, min: -45, max: 0 },
-            DefaultSubConfig,
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: 0, min: -45, max: 0 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
     });
 
     head.addChild(trunk1);
@@ -111,15 +127,15 @@ export class Elephant extends Model {
     trunk.push(trunk1);
 
     const trunk2 = new Cube("Trunk2", {
-        center: [0, -trunkSize[1] / 2, 0],
-        size: trunkSize,
+      center: [0, -trunkSize[1] / 2, 0],
+      size: trunkSize,
     });
     trunk2.setAnimationConfig({
-        rotation: [
-            { offset: 0, min: -45, max: 0 },
-            DefaultSubConfig,
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: 0, min: -45, max: 0 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
     });
 
     trunk1.addChild(trunk2);
@@ -127,17 +143,17 @@ export class Elephant extends Model {
     trunk.push(trunk2);
 
     const trunk3 = new Cube("Trunk3", {
-        center: [0, -trunkSize[1] / 2, 0],
-        size: trunkSize,
+      center: [0, -trunkSize[1] / 2, 0],
+      size: trunkSize,
     });
     trunk3.setAnimationConfig({
-        rotation: [
-            { offset: 0, min: -45, max: 0 },
-            DefaultSubConfig,
-            DefaultSubConfig
-        ]
-    });    
-    
+      rotation: [
+        { offset: 0, min: -45, max: 0 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
+    });
+
     trunk2.addChild(trunk3);
     trunk3.setAnchorPoint([0, -trunkSize[1], 0]);
     trunk.push(trunk3);
@@ -149,130 +165,144 @@ export class Elephant extends Model {
 
     // Right Leg
     const rightFrontLeg1 = new Cube("rightFrontLeg1", {
-        center: [0, -upperLegSize[1] / 2, 0],
-        size: upperLegSize,
+      center: [0, -upperLegSize[1] / 2, 0],
+      size: upperLegSize,
     });
     rightFrontLeg1.setAnimationConfig({
-        rotation: [
-            { offset: 0, min: 15, max: -15 },
-            DefaultSubConfig,
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: 0, min: 15, max: -15 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
     });
 
     body.addChild(rightFrontLeg1);
-    rightFrontLeg1.setAnchorPoint([-bodySize[0] / 2 + upperLegSize[0] / 2, -bodySize[1] / 2 + 0.25, bodySize[2] / 2 - upperLegSize[2] / 2]);
+    rightFrontLeg1.setAnchorPoint([
+      -bodySize[0] / 2 + upperLegSize[0] / 2,
+      -bodySize[1] / 2 + 0.25,
+      bodySize[2] / 2 - upperLegSize[2] / 2,
+    ]);
     leg.push(rightFrontLeg1);
 
     const rightFrontLeg2 = new Cube("rightFrontLeg2", {
-        center: [0, -bottomLegSize[1] / 2, 0],
-        size: bottomLegSize,
+      center: [0, -bottomLegSize[1] / 2, 0],
+      size: bottomLegSize,
     });
     rightFrontLeg2.setAnimationConfig({
-        rotation: [
-            { offset: 0, min: 0, max: 10 },
-            DefaultSubConfig,
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: 0, min: 0, max: 10 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
     });
 
     rightFrontLeg1.addChild(rightFrontLeg2);
     rightFrontLeg2.setAnchorPoint([0, -upperLegSize[1] + 0.25, 0]);
     leg.push(rightFrontLeg2);
-    
 
     const rightBackLeg1 = new Cube("rightBackLeg1", {
-        center: [0, -upperLegSize[1] / 2, 0],
-        size: upperLegSize,
+      center: [0, -upperLegSize[1] / 2, 0],
+      size: upperLegSize,
     });
     rightBackLeg1.setAnimationConfig({
-        rotation: [
-            { offset: 0, min: 15, max: -15 },
-            DefaultSubConfig,
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: 0, min: 15, max: -15 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
     });
 
     body.addChild(rightBackLeg1);
-    rightBackLeg1.setAnchorPoint([-bodySize[0] / 2 + upperLegSize[0] / 2, -bodySize[1] / 2 + 0.25, -bodySize[2] / 2 + upperLegSize[2] / 2]);
+    rightBackLeg1.setAnchorPoint([
+      -bodySize[0] / 2 + upperLegSize[0] / 2,
+      -bodySize[1] / 2 + 0.25,
+      -bodySize[2] / 2 + upperLegSize[2] / 2,
+    ]);
     leg.push(rightBackLeg1);
 
     const rightBackLeg2 = new Cube("rightBackLeg2", {
-        center: [0, -bottomLegSize[1] / 2, 0],
-        size: bottomLegSize,
+      center: [0, -bottomLegSize[1] / 2, 0],
+      size: bottomLegSize,
     });
     rightBackLeg2.setAnimationConfig({
-        rotation: [
-            { offset: 0, min: 0, max: 10 },
-            DefaultSubConfig,
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: 0, min: 0, max: 10 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
     });
 
     rightBackLeg1.addChild(rightBackLeg2);
     rightBackLeg2.setAnchorPoint([0, -upperLegSize[1] + 0.25, 0]);
     leg.push(rightBackLeg2);
-    
+
     // Left Leg
     const leftFrontLeg1 = new Cube("leftFrontLeg1", {
-        center: [0, -upperLegSize[1] / 2, 0],
-        size: upperLegSize,
+      center: [0, -upperLegSize[1] / 2, 0],
+      size: upperLegSize,
     });
     leftFrontLeg1.setAnimationConfig({
-        rotation: [
-            { offset: 0, min: -15, max: 15 },
-            DefaultSubConfig,
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: 0, min: -15, max: 15 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
     });
 
     body.addChild(leftFrontLeg1);
-    leftFrontLeg1.setAnchorPoint([bodySize[0] / 2 - upperLegSize[0] / 2, -bodySize[1] / 2 + 0.25, bodySize[2] / 2 - upperLegSize[2] / 2]);
+    leftFrontLeg1.setAnchorPoint([
+      bodySize[0] / 2 - upperLegSize[0] / 2,
+      -bodySize[1] / 2 + 0.25,
+      bodySize[2] / 2 - upperLegSize[2] / 2,
+    ]);
     leg.push(leftFrontLeg1);
 
     const leftFrontLeg2 = new Cube("leftFrontLeg2", {
-        center: [0, -bottomLegSize[1] / 2, 0],
-        size: bottomLegSize,
+      center: [0, -bottomLegSize[1] / 2, 0],
+      size: bottomLegSize,
     });
     leftFrontLeg2.setAnimationConfig({
-        rotation: [
-            { offset: 0, min: 0, max: 10 },
-            DefaultSubConfig,
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: 0, min: 0, max: 10 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
     });
 
     leftFrontLeg1.addChild(leftFrontLeg2);
     leftFrontLeg2.setAnchorPoint([0, -upperLegSize[1] + 0.25, 0]);
     leg.push(leftFrontLeg2);
-    
 
     const leftBackLeg1 = new Cube("leftBackLeg1", {
-        center: [0, -upperLegSize[1] / 2, 0],
-        size: upperLegSize,
+      center: [0, -upperLegSize[1] / 2, 0],
+      size: upperLegSize,
     });
     leftBackLeg1.setAnimationConfig({
-        rotation: [
-            { offset: 0, min: -15, max: 15 },
-            DefaultSubConfig,
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: 0, min: -15, max: 15 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
     });
 
     body.addChild(leftBackLeg1);
-    leftBackLeg1.setAnchorPoint([bodySize[0] / 2 - upperLegSize[0] / 2, -bodySize[1] / 2 + 0.25, -bodySize[2] / 2 + upperLegSize[2] / 2]);
+    leftBackLeg1.setAnchorPoint([
+      bodySize[0] / 2 - upperLegSize[0] / 2,
+      -bodySize[1] / 2 + 0.25,
+      -bodySize[2] / 2 + upperLegSize[2] / 2,
+    ]);
     leg.push(leftBackLeg1);
 
     const leftBackLeg2 = new Cube("leftBackLeg2", {
-        center: [0, -bottomLegSize[1] / 2, 0],
-        size: bottomLegSize,
+      center: [0, -bottomLegSize[1] / 2, 0],
+      size: bottomLegSize,
     });
     leftBackLeg2.setAnimationConfig({
-        rotation: [
-            { offset: 0, min: 0, max: 10 },
-            DefaultSubConfig,
-            DefaultSubConfig
-        ]
+      rotation: [
+        { offset: 0, min: 0, max: 10 },
+        DefaultSubConfig,
+        DefaultSubConfig,
+      ],
     });
 
     leftBackLeg1.addChild(leftBackLeg2);
@@ -281,39 +311,38 @@ export class Elephant extends Model {
 
     // Tail
     const tailSize: Vec3 = [0.25, 1, 0.25];
-    const tail: Cube[] = []
+    const tail: Cube[] = [];
     const tail1 = new Cube("Tail1", {
-        center: [0, -tailSize[1] / 2, 0],
-        size: tailSize,
+      center: [0, -tailSize[1] / 2, 0],
+      size: tailSize,
     });
     tail1.setAnimationConfig({
-        rotation: [
-            { offset: 15, min: 0, max: 0 },
-            DefaultSubConfig,
-            { offset: 0, min: -10, max: 20},
-        ]
+      rotation: [
+        { offset: 15, min: 0, max: 0 },
+        DefaultSubConfig,
+        { offset: 0, min: -10, max: 20 },
+      ],
     });
 
     body.addChild(tail1);
     tail1.setAnchorPoint([0, 0, -bodySize[2] / 2 - tailSize[2] / 4]);
     tail.push(tail1);
-    
+
     const tail2 = new Cube("Tail2", {
-        center: [0, -tailSize[1] / 2, 0],
-        size: tailSize,
+      center: [0, -tailSize[1] / 2, 0],
+      size: tailSize,
     });
     tail2.setAnimationConfig({
-        rotation: [
-            DefaultSubConfig,
-            DefaultSubConfig,
-            { offset: 0, min: 10, max: -20},
-        ]
+      rotation: [
+        DefaultSubConfig,
+        DefaultSubConfig,
+        { offset: 0, min: 10, max: -20 },
+      ],
     });
 
     tail1.addChild(tail2);
     tail2.setAnchorPoint([0, -tailSize[1], 0]);
     tail.push(tail2);
-
 
     shapes.push(body);
     shapes.push(neck);
