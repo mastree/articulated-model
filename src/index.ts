@@ -302,6 +302,9 @@ loadDefaults();
 
 const saveBtn = document.getElementById("saveBtn") as HTMLInputElement;
 saveBtn.onclick = (e) => {
+  // var gapp = {
+
+  // };
   const dataStr =
     "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(app));
   const downloadWidget = document.getElementById("downloadLink") as HTMLElement;

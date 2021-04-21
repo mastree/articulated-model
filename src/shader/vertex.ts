@@ -201,7 +201,7 @@ export const environmentCubeVertexShader = `
     vec3 worldPos = (uTransformationMatrix * vec4(aVertexPosition, 1)).xyz;
     vec3 worldNormal = normalize(mat3(uTransformationMatrix) * aVertexNormal);
     vec3 worldCamPos = uWorldCamPos;
-    vec3 eyeToSurfaceDir = normalize(worldPos - worldCamPos);
+    vec3 eyeToSurfaceDir = normalize(worldCamPos - worldPos);
     R = reflect(eyeToSurfaceDir, worldNormal);
     //======================
     gl_Position = uProjectionMatrix * uViewMatrix * uTransformationMatrix *  vec4(aVertexPosition, 1);    

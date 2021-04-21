@@ -74,9 +74,7 @@ const loadTexture = (url: string): [WebGLTexture | null, HTMLImageElement] => {
 
 export default abstract class Shape {
   program: WebGLProgram;
-  // programs: WebGLProgram[] = [];
   programInfo: ProgramInfo;
-  // programInfos: ProgramInfo[] = [];
   children: Shape[] = [];
   animate: boolean = false;
   animationSpeed: number = 0.5;
