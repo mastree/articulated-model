@@ -213,3 +213,53 @@ export const environmentCubeVertexShader = `
     vLighting = uAmbientLight + (uDirectionalLightColor * directional);
   }
 `;
+
+export const bumpCubeVertexShader = `
+  precision highp float;
+
+  // vertex
+  attribute vec3 aVertexPosition;
+  attribute vec3 aVertexNormal;
+  attribute vec4 aVertexColor;
+
+  // transformation
+  uniform mat4 uTransformationMatrix;
+  uniform mat4 uProjectionMatrix;
+  uniform mat4 uViewMatrix;
+
+  // lighting
+  uniform vec3 uAmbientLight;
+  uniform vec3 uDirectionalVector;
+  uniform vec3 uDirectionalLightColor;
+
+  varying vec4 vColor;
+  varying vec3 vLighting;
+
+  attribute vec2 vTexCoord;
+  varying vec2 fTexCoord;
+  uniform vec3 uWorldCamPos;
+
+  varying vec3 R;
+  
+  ${matrixSnippet}
+
+  void main() {
+    fTexCoord = vTexCoord;
+    vColor = aVertexColor;
+
+    // env mapping
+    vec3 worldPos = (uTransformationMatrix * vec4(aVertexPosition, 1)).xyz;
+    vec3 worldNormal = normalize(mat3(uTransformationMatrix) * aVertexNormal);
+    vec3 worldCamPos = uWorldCamPos;
+    vec3 eyeToSurfaceDir = normalize(worldPos - worldCamPos);
+    R = reflect(eyeToSurfaceDir, worldNormal);
+    //======================
+    gl_Position = uProjectionMatrix * uViewMatrix * uTransformationMatrix *  vec4(aVertexPosition, 1);    
+
+    // lighting
+    vec4 transformedNormal = transpose(inverse(uTransformationMatrix)) * vec4(aVertexNormal, 1);
+    vec3 directionalVector = normalize(uDirectionalVector);
+    float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
+    vLighting = uAmbientLight + (uDirectionalLightColor * directional);
+  }
+`;

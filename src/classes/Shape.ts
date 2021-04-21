@@ -2,8 +2,75 @@ import { gl } from "../sauce";
 import m4 from "../utils/m4-utils";
 import { createShader, createProgram } from "../utils/shader-utils";
 import { imageSize, image, texPos } from "../constant";
-import { textureCubeVertexShader, environmentCubeVertexShader, cubeVertexShader } from "../shader/vertex";
-import { textureFragmentShader, environmentFragmentShader, cubeFragmentShader } from "../shader/fragment";
+import {
+  textureCubeVertexShader,
+  environmentCubeVertexShader,
+  cubeVertexShader,
+  bumpCubeVertexShader,
+} from "../shader/vertex";
+import {
+  textureFragmentShader,
+  environmentFragmentShader,
+  cubeFragmentShader,
+  bumpFragmentShader,
+} from "../shader/fragment";
+
+const loadTexture = (url: string): [WebGLTexture | null, HTMLImageElement] => {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  const level = 0;
+  const internalFormat = gl.RGBA;
+  const width = 1;
+  const height = 1;
+  const border = 0;
+  const srcFormat = gl.RGBA;
+  const srcType = gl.UNSIGNED_BYTE;
+  const pixel = new Uint8Array([0, 0, 255, 255]);
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    level,
+    internalFormat,
+    width,
+    height,
+    border,
+    srcFormat,
+    srcType,
+    pixel
+  );
+  const image = new Image();
+  image.onload = function () {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      level,
+      internalFormat,
+      srcFormat,
+      srcType,
+      image
+    );
+
+    const isPowerOf2 = (value: number): boolean => {
+      return (value & (value - 1)) == 0;
+    };
+    // WebGL1 has different requirements for power of 2 images
+    // vs non power of 2 images so check if the image is a
+    // power of 2 in both dimensions.
+    if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+      // Yes, it's a power of 2. Generate mips.
+      gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+      // No, it's not a power of 2. Turn off mips and set
+      // wrapping to clamp to edge
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+  };
+  image.src = url;
+
+  return [texture, image];
+};
 
 export default abstract class Shape {
   program: WebGLProgram;
@@ -22,15 +89,29 @@ export default abstract class Shape {
   };
   scaledTime: number = 0;
   selectedShader: number = 1;
-  vertexShaders: string[] = [cubeVertexShader, textureCubeVertexShader, environmentCubeVertexShader];
-  fragmentShaders: string[] = [cubeFragmentShader, textureFragmentShader, environmentFragmentShader];
+  vertexShaders: string[] = [
+    cubeVertexShader,
+    textureCubeVertexShader,
+    environmentCubeVertexShader,
+    bumpCubeVertexShader,
+  ];
+  fragmentShaders: string[] = [
+    cubeFragmentShader,
+    textureFragmentShader,
+    environmentFragmentShader,
+    bumpFragmentShader,
+  ];
 
   constructor(
     vertexShader: string,
     fragmentShader: string,
     public name: string = "Default Shape Name"
   ) {
-    this.program = createProgram(gl, this.vertexShaders[this.selectedShader], this.fragmentShaders[this.selectedShader]);
+    this.program = createProgram(
+      gl,
+      this.vertexShaders[this.selectedShader],
+      this.fragmentShaders[this.selectedShader]
+    );
     const { program } = this;
     this.programInfo = {
       program: program,
@@ -170,8 +251,6 @@ export default abstract class Shape {
         value: data.programInfo.uWorldCamPos.value,
       },
     };
-
-    console.log(data.programInfo);
   }
 
   persistAttribute(attr: GLAttribute) {
@@ -247,7 +326,7 @@ export default abstract class Shape {
   initShader() {
     const { program } = this;
 
-    if (this.selectedShader == 1){
+    if (this.selectedShader == 1) {
       var texture = gl.createTexture();
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -278,41 +357,41 @@ export default abstract class Shape {
       var vTexCoord = gl.getAttribLocation(program, "vTexCoord");
       gl.enableVertexAttribArray(vTexCoord);
       gl.vertexAttribPointer(vTexCoord, 2, gl.FLOAT, false, 0, 0);
-    } else if (this.selectedShader == 2){
-      let useImg = false;
-      if (useImg){
+    } else if (this.selectedShader == 2) {
+      let useImg = !false;
+      if (useImg) {
         var texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-    
+
         const faceInfos = [
           {
             target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-            url: '/img/pos-x.jpg',
+            url: "/img/pos-x.jpg",
           },
           {
             target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-            url: '/img/neg-x.jpg',
+            url: "/img/neg-x.jpg",
           },
           {
             target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-            url: '/img/pos-y.jpg',
+            url: "/img/pos-y.jpg",
           },
           {
             target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-            url: '/img/neg-y.jpg',
+            url: "/img/neg-y.jpg",
           },
           {
             target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-            url: '/img/pos-z.jpg',
+            url: "/img/pos-z.jpg",
           },
           {
             target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-            url: '/img/neg-z.jpg',
+            url: "/img/neg-z.jpg",
           },
         ];
         faceInfos.forEach((faceInfo) => {
-          const {target, url} = faceInfo;
-    
+          const { target, url } = faceInfo;
+
           // Upload the canvas to the cubemap face.
           const level = 0;
           const internalFormat = gl.RGBA;
@@ -320,55 +399,176 @@ export default abstract class Shape {
           const height = 512;
           const format = gl.RGBA;
           const type = gl.UNSIGNED_BYTE;
-    
+
           // setup each face so it's immediately renderable
-          gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
-    
+          gl.texImage2D(
+            target,
+            level,
+            internalFormat,
+            width,
+            height,
+            0,
+            format,
+            type,
+            null
+          );
+
           // Asynchronously load an image
           const image = new Image();
           image.src = url;
-          image.addEventListener('load', function() {
-            // Now that the image has loaded make copy it to the texture.
-            gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-            gl.texImage2D(target, level, internalFormat, format, type, image);
-            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-          });
+          // image.addEventListener("load", function () {
+          //   // Now that the image has loaded make copy it to the texture.
+          //   gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+          //   gl.texImage2D(target, level, internalFormat, format, type, image);
+          //   gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+          // });
+          gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+          gl.texImage2D(target, level, internalFormat, format, type, image);
+          gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
         });
         gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-        gl.uniform1i(gl.getUniformLocation(program, "texture"),0);
-      } else{
+        gl.texParameteri(
+          gl.TEXTURE_CUBE_MAP,
+          gl.TEXTURE_MIN_FILTER,
+          gl.LINEAR_MIPMAP_LINEAR
+        );
+        console.log(gl.getUniformLocation(program, "texture"));
+        gl.uniform1i(gl.getUniformLocation(program, "texture"), 0);
+      } else {
         let cubeMap = gl.createTexture();
-  
+
         let red = new Uint8Array([255, 0, 0, 255]);
         let green = new Uint8Array([0, 255, 0, 255]);
         let blue = new Uint8Array([0, 0, 255, 255]);
         let cyan = new Uint8Array([0, 255, 255, 255]);
         let magenta = new Uint8Array([255, 0, 255, 255]);
         let yellow = new Uint8Array([255, 255, 0, 255]);
-  
+
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeMap);
-        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X ,0,gl.RGBA,
-          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, red);
-        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X ,0,gl.RGBA,
-          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, green);
-        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y ,0,gl.RGBA,
-          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, blue);
-        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y ,0,gl.RGBA,
-          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, cyan);
-        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z ,0,gl.RGBA,
-          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, yellow);
-        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z ,0,gl.RGBA,
-          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, magenta);
-  
-  
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
-        gl.activeTexture( gl.TEXTURE0 );
-        gl.uniform1i(gl.getUniformLocation(program, "texture"),0);
+        gl.texImage2D(
+          gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+          0,
+          gl.RGBA,
+          1,
+          1,
+          0,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          red
+        );
+        gl.texImage2D(
+          gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+          0,
+          gl.RGBA,
+          1,
+          1,
+          0,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          green
+        );
+        gl.texImage2D(
+          gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+          0,
+          gl.RGBA,
+          1,
+          1,
+          0,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          blue
+        );
+        gl.texImage2D(
+          gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+          0,
+          gl.RGBA,
+          1,
+          1,
+          0,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          cyan
+        );
+        gl.texImage2D(
+          gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+          0,
+          gl.RGBA,
+          1,
+          1,
+          0,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          yellow
+        );
+        gl.texImage2D(
+          gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+          0,
+          gl.RGBA,
+          1,
+          1,
+          0,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          magenta
+        );
+
+        gl.texParameteri(
+          gl.TEXTURE_CUBE_MAP,
+          gl.TEXTURE_MAG_FILTER,
+          gl.NEAREST
+        );
+        gl.texParameteri(
+          gl.TEXTURE_CUBE_MAP,
+          gl.TEXTURE_MIN_FILTER,
+          gl.NEAREST
+        );
+        gl.activeTexture(gl.TEXTURE0);
+        gl.uniform1i(gl.getUniformLocation(program, "texture"), 0);
       }
-    } else if (this.selectedShader == 3){
+    } else if (this.selectedShader == 3) {
       // TODO: bump mapping
+      const [texture, textureImage] = loadTexture("/img/taj_orig.jpg");
+      const [bumpTexture, bumpImage] = loadTexture("/img/taj_emboss.jpg");
+
+      // prettier-ignore
+      const texCoords = [
+        // Front
+        0.0,  0.0,
+        1.0,  0.0,
+        1.0,  1.0,
+        0.0,  1.0,
+        // Back
+        0.0,  0.0,
+        1.0,  0.0,
+        1.0,  1.0,
+        0.0,  1.0,
+        // Top
+        0.0,  0.0,
+        1.0,  0.0,
+        1.0,  1.0,
+        0.0,  1.0,
+        // Bottom
+        0.0,  0.0,
+        1.0,  0.0,
+        1.0,  1.0,
+        0.0,  1.0,
+        // Right
+        0.0,  0.0,
+        1.0,  0.0,
+        1.0,  1.0,
+        0.0,  1.0,
+        // Left
+        0.0,  0.0,
+        1.0,  0.0,
+        1.0,  1.0,
+        0.0,  1.0,
+      ];
+
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, bumpTexture);
     }
   }
 
@@ -444,26 +644,64 @@ export default abstract class Shape {
     this.programInfo.anchorPoint = anchorPoint;
   }
 
-  setWorldCamPos(pos: number[]){
+  setWorldCamPos(pos: number[]) {
     this.programInfo.uWorldCamPos.value = pos;
   }
 
-  setSelectedShader(id: number){
+  setSelectedShader(id: number) {
     this.selectedShader = id;
-    this.program = createProgram(gl, this.vertexShaders[this.selectedShader], this.fragmentShaders[this.selectedShader]);
+    this.program = createProgram(
+      gl,
+      this.vertexShaders[this.selectedShader],
+      this.fragmentShaders[this.selectedShader]
+    );
     const { program } = this;
     this.programInfo.program = program;
-    this.programInfo.aVertexPosition.location = gl.getAttribLocation(program, "aVertexPosition")
-    this.programInfo.aVertexNormal.location = gl.getAttribLocation(program, "aVertexNormal")
-    this.programInfo.aVertexColor.location = gl.getAttribLocation(program, "aVertexColor")
-    this.programInfo.uProjectionMatrix.location = gl.getUniformLocation(program, "uProjectionMatrix")
-    this.programInfo.uViewMatrix.location = gl.getUniformLocation(program, "uViewMatrix")
-    this.programInfo.uAmbientLight.location = gl.getUniformLocation(program, "uAmbientLight")
-    this.programInfo.uDirectionalVector.location = gl.getUniformLocation(program, "uDirectionalVector")
-    this.programInfo.uDirectionalLightColor.location = gl.getUniformLocation(program, "uDirectionalLightColor")
-    this.programInfo.uLightingOn.location = gl.getUniformLocation(program, "uLightingOn")
-    this.programInfo.uTransformationMatrix.location = gl.getUniformLocation(program, "uTransformationMatrix")
-    this.programInfo.uWorldCamPos.location = gl.getUniformLocation(program, "uWorldCamPos")
+    this.programInfo.aVertexPosition.location = gl.getAttribLocation(
+      program,
+      "aVertexPosition"
+    );
+    this.programInfo.aVertexNormal.location = gl.getAttribLocation(
+      program,
+      "aVertexNormal"
+    );
+    this.programInfo.aVertexColor.location = gl.getAttribLocation(
+      program,
+      "aVertexColor"
+    );
+    this.programInfo.uProjectionMatrix.location = gl.getUniformLocation(
+      program,
+      "uProjectionMatrix"
+    );
+    this.programInfo.uViewMatrix.location = gl.getUniformLocation(
+      program,
+      "uViewMatrix"
+    );
+    this.programInfo.uAmbientLight.location = gl.getUniformLocation(
+      program,
+      "uAmbientLight"
+    );
+    this.programInfo.uDirectionalVector.location = gl.getUniformLocation(
+      program,
+      "uDirectionalVector"
+    );
+    this.programInfo.uDirectionalLightColor.location = gl.getUniformLocation(
+      program,
+      "uDirectionalLightColor"
+    );
+    this.programInfo.uLightingOn.location = gl.getUniformLocation(
+      program,
+      "uLightingOn"
+    );
+    this.programInfo.uTransformationMatrix.location = gl.getUniformLocation(
+      program,
+      "uTransformationMatrix"
+    );
+    this.programInfo.uWorldCamPos.location = gl.getUniformLocation(
+      program,
+      "uWorldCamPos"
+    );
+    this.initShader();
   }
 
   addChild(shape: Shape) {
