@@ -12,6 +12,7 @@ class Application {
   camera: CameraConfig;
   projection: Projection;
   lighting: LightingConfig;
+  selectedShader: number = 1;
 
   constructor() {
     this.projection = "orthographic";
@@ -101,14 +102,40 @@ class Application {
 
   applyViewTransform() {
     const { radius, angle } = this.camera;
+    let camPos = [0, 0, 0, 1];
 
-    let cameraMatrix = m4.yRotation(degToRad(angle));
+    let cameraMatrix = [
+      1, 0, 0, 0, 
+      0, 1, 0, 0, 
+      0, 0, 1, 0, 
+      0, 0, 0, 1
+    ];
+    cameraMatrix = m4.yRotate(cameraMatrix, degToRad(angle));
     cameraMatrix = m4.translate(cameraMatrix, 0, 0, radius * 1.5);
+
+    let mrot = m4.yRotation(degToRad(angle));
+    let mtrans = m4.translation(0, 0, radius * 1.5);
+
+    let nCam = [0, 0, 0, 0];
+    for (let i=0;i<4;i++){
+      for (let j=0;j<4;j++){
+        nCam[i] += camPos[j] * mtrans[j * 4 + i];
+      }
+    }
+    camPos = [...nCam];
+    nCam = [0, 0, 0, 0];
+    for (let i=0;i<4;i++){
+      for (let j=0;j<4;j++){
+        nCam[i] += camPos[j] * mrot[j * 4 + i];
+      }
+    }
+    camPos = [...nCam];
 
     const viewMatrix = m4.inverse(cameraMatrix);
 
     for (const shape of this.shapes) {
       shape.setViewMatrix(viewMatrix);
+      shape.setWorldCamPos(camPos.slice(0, 3));
     }
   }
 
@@ -178,6 +205,13 @@ class Application {
     }
   }
 
+  setSelectedShader(num: number){
+    this.selectedShader = num;
+    for (const shape of this.shapes){
+      shape.setSelectedShader(this.selectedShader);
+    }
+  }
+
   articulateRender(delta: number) {
     gl.clearDepth(1.0);
     gl.clearColor(1, 1, 1, 1.0);
@@ -193,6 +227,7 @@ class Application {
 
     this.applyLighting();
     let ident = m4.identity();
+    // this.loadEnvironment(this.shapes[0].program, false);
     this.articulateRenderDfs(delta, this.shapes[0], ident);
   }
 

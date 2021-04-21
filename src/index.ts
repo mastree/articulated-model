@@ -15,6 +15,8 @@ app.models.push(new Spider("Spider"));
 app.models.push(new Elephant("Elephant"));
 // app.models.push(new ChainCube("Chain Cube"));
 app.setSelectedModel(0);
+app.setSelectedShader(1);
+// app.loadEnvironment(app.shapes[0].program);
 
 let prev = Date.now();
 const render = (time: number) => {
@@ -108,6 +110,16 @@ const populateObjectSelector = () => {
   );
 };
 populateObjectSelector();
+
+const shaderSelector = document.getElementById(
+  "selectedShader"
+) as HTMLSelectElement;
+if (!shaderSelector) {
+  throw new Error("Model selector not found");
+}
+shaderSelector.onchange = () => {
+  app.setSelectedShader(parseInt(shaderSelector.value));
+};
 
 const modelSelector = document.getElementById(
   "selectedModel"

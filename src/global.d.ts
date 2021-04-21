@@ -60,6 +60,7 @@ type ProgramInfo = {
   anchorPoint: number[]; // length 3 (3D point)
   uAncestorsMatrix: number[];
   uTransformationMatrix: GLUniform;
+  uWorldCamPos: GLUniform;
 };
 
 type SubConfig = {

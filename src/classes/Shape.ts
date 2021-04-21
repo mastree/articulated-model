@@ -1,10 +1,15 @@
 import { gl } from "../sauce";
 import m4 from "../utils/m4-utils";
-import { createProgram } from "../utils/shader-utils";
+import { createShader, createProgram } from "../utils/shader-utils";
+import { imageSize, image, texPos } from "../constant";
+import { textureCubeVertexShader, environmentCubeVertexShader } from "../shader/vertex";
+import { textureFragmentShader, environmentFragmentShader } from "../shader/fragment";
 
 export default abstract class Shape {
   program: WebGLProgram;
+  // programs: WebGLProgram[] = [];
   programInfo: ProgramInfo;
+  // programInfos: ProgramInfo[] = [];
   children: Shape[] = [];
   animate: boolean = true; // TODO: set defaultnya false, bikin toggler
   animationSpeed: number = 0.5;
@@ -16,23 +21,19 @@ export default abstract class Shape {
     ],
   };
   scaledTime: number = 0;
-  // animationCycle = {
-  //   size: 1,
-  //   minAnimate: 0,
-  //   maxAnimate: 0,
-  // };
-  // curCycle = 0;
+  selectedShader: number = 1;
+  vertexShaders: string[] = [textureCubeVertexShader, environmentCubeVertexShader];
+  fragmentShaders: string[] = [textureFragmentShader, environmentFragmentShader];
 
   constructor(
     vertexShader: string,
     fragmentShader: string,
     public name: string = "Default Shape Name"
   ) {
-    this.program = createProgram(gl, vertexShader, fragmentShader);
-
+    this.program = createProgram(gl, this.vertexShaders[this.selectedShader], this.fragmentShaders[this.selectedShader]);
     const { program } = this;
     this.programInfo = {
-      program: this.program,
+      program: program,
       aVertexPosition: {
         buffer: gl.createBuffer(),
         location: gl.getAttribLocation(program, "aVertexPosition"),
@@ -90,6 +91,11 @@ export default abstract class Shape {
         type: "mat4",
         location: gl.getUniformLocation(program, "uTransformationMatrix"),
         value: m4.identity(),
+      },
+      uWorldCamPos: {
+        type: "vec3",
+        location: gl.getUniformLocation(program, "uWorldCamPos"),
+        value: [0, 0, 0],
       },
     };
   }
@@ -158,6 +164,11 @@ export default abstract class Shape {
         location: gl.getUniformLocation(program, "uTransformationMatrix"),
         value: data.programInfo.uTransformationMatrix.value,
       },
+      uWorldCamPos: {
+        type: "vec3",
+        location: gl.getUniformLocation(program, "uWorldCamPos"),
+        value: data.programInfo.uWorldCamPos.value,
+      },
     };
 
     console.log(data.programInfo);
@@ -213,6 +224,7 @@ export default abstract class Shape {
     // transformation
     this.persistUniform(info.uProjectionMatrix);
     this.persistUniform(this.programInfo.uViewMatrix);
+    this.persistUniform(info.uWorldCamPos);
 
     this.programInfo.uTransformationMatrix.value = m4.multiply(
       info.uAncestorsMatrix as number[],
@@ -231,6 +243,134 @@ export default abstract class Shape {
   abstract render(): void;
   abstract renderWith(addTrans: number[]): void;
   abstract loadDefaults(): void;
+
+  initShader() {
+    const { program } = this;
+
+    if (this.selectedShader == 0){
+      var texture = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        imageSize,
+        imageSize,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        new Uint8Array(image)
+      );
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(
+        gl.TEXTURE_2D,
+        gl.TEXTURE_MIN_FILTER,
+        gl.NEAREST_MIPMAP_LINEAR
+      );
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+      var tBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, tBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texPos), gl.STATIC_DRAW);
+
+      var vTexCoord = gl.getAttribLocation(program, "vTexCoord");
+      gl.enableVertexAttribArray(vTexCoord);
+      gl.vertexAttribPointer(vTexCoord, 2, gl.FLOAT, false, 0, 0);
+    } else if (this.selectedShader == 1){
+      let useImg = false;
+      if (useImg){
+        var texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+    
+        const faceInfos = [
+          {
+            target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+            url: '/img/pos-x.jpg',
+          },
+          {
+            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+            url: '/img/neg-x.jpg',
+          },
+          {
+            target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+            url: '/img/pos-y.jpg',
+          },
+          {
+            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+            url: '/img/neg-y.jpg',
+          },
+          {
+            target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+            url: '/img/pos-z.jpg',
+          },
+          {
+            target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+            url: '/img/neg-z.jpg',
+          },
+        ];
+        faceInfos.forEach((faceInfo) => {
+          const {target, url} = faceInfo;
+    
+          // Upload the canvas to the cubemap face.
+          const level = 0;
+          const internalFormat = gl.RGBA;
+          const width = 512;
+          const height = 512;
+          const format = gl.RGBA;
+          const type = gl.UNSIGNED_BYTE;
+    
+          // setup each face so it's immediately renderable
+          gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
+    
+          // Asynchronously load an image
+          const image = new Image();
+          image.src = url;
+          image.addEventListener('load', function() {
+            // Now that the image has loaded make copy it to the texture.
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+            gl.texImage2D(target, level, internalFormat, format, type, image);
+            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+          });
+        });
+        gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.uniform1i(gl.getUniformLocation(program, "texture"),0);
+      } else{
+        let cubeMap = gl.createTexture();
+  
+        let red = new Uint8Array([255, 0, 0, 255]);
+        let green = new Uint8Array([0, 255, 0, 255]);
+        let blue = new Uint8Array([0, 0, 255, 255]);
+        let cyan = new Uint8Array([0, 255, 255, 255]);
+        let magenta = new Uint8Array([255, 0, 255, 255]);
+        let yellow = new Uint8Array([255, 255, 0, 255]);
+  
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeMap);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X ,0,gl.RGBA,
+          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, red);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X ,0,gl.RGBA,
+          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, green);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y ,0,gl.RGBA,
+          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, blue);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y ,0,gl.RGBA,
+          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, cyan);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z ,0,gl.RGBA,
+          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, yellow);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z ,0,gl.RGBA,
+          1,1,0,gl.RGBA,gl.UNSIGNED_BYTE, magenta);
+  
+  
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
+        gl.activeTexture( gl.TEXTURE0 );
+        gl.uniform1i(gl.getUniformLocation(program, "texture"),0);
+      }
+    } else{
+      // TODO: bump mapping
+    }
+  }
 
   setProjectionMatrix(projectionMatrix: number[]) {
     this.programInfo.uProjectionMatrix.value = projectionMatrix;
@@ -302,6 +442,28 @@ export default abstract class Shape {
 
   setAnchorPoint(anchorPoint: number[]) {
     this.programInfo.anchorPoint = anchorPoint;
+  }
+
+  setWorldCamPos(pos: number[]){
+    this.programInfo.uWorldCamPos.value = pos;
+  }
+
+  setSelectedShader(id: number){
+    this.selectedShader = id;
+    this.program = createProgram(gl, this.vertexShaders[this.selectedShader], this.fragmentShaders[this.selectedShader]);
+    const { program } = this;
+    this.programInfo.program = program;
+    this.programInfo.aVertexPosition.location = gl.getAttribLocation(program, "aVertexPosition")
+    this.programInfo.aVertexNormal.location = gl.getAttribLocation(program, "aVertexNormal")
+    this.programInfo.aVertexColor.location = gl.getAttribLocation(program, "aVertexColor")
+    this.programInfo.uProjectionMatrix.location = gl.getUniformLocation(program, "uProjectionMatrix")
+    this.programInfo.uViewMatrix.location = gl.getUniformLocation(program, "uViewMatrix")
+    this.programInfo.uAmbientLight.location = gl.getUniformLocation(program, "uAmbientLight")
+    this.programInfo.uDirectionalVector.location = gl.getUniformLocation(program, "uDirectionalVector")
+    this.programInfo.uDirectionalLightColor.location = gl.getUniformLocation(program, "uDirectionalLightColor")
+    this.programInfo.uLightingOn.location = gl.getUniformLocation(program, "uLightingOn")
+    this.programInfo.uTransformationMatrix.location = gl.getUniformLocation(program, "uTransformationMatrix")
+    this.programInfo.uWorldCamPos.location = gl.getUniformLocation(program, "uWorldCamPos")
   }
 
   addChild(shape: Shape) {
