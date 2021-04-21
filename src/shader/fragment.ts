@@ -67,18 +67,16 @@ export const bumpFragmentShader = `
   varying vec3 v_U3d, v_V3d;
   varying vec2 v_Texture_coordinate;
 
-  uniform vec3 u_Light_position;
-  uniform vec3 u_Light_color;
-  uniform vec3 u_Ambient_intensities;
+  vec3 u_Light_position = vec3(5, 5, 5);
+  vec3 u_Light_color = vec3(1, 1, 1);
+  vec3 u_Ambient_intensities = vec3(0.3, 0.3, 0.3);
   uniform vec2 u_Image_size;
-  uniform float u_Shininess;
+  float u_Shininess = 10.0;
   // end of runestone
 
   varying vec4 vColor;
   varying vec3 vLighting;
 
-  uniform bool uLightingOn;
-  
   uniform sampler2D uSampler;
   uniform sampler2D uBumpSampler;
   uniform bool uLightingOn;

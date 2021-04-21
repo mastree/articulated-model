@@ -26,16 +26,16 @@ class Application {
     this.lighting = LightingDefault;
   }
 
-  getSaveApp(): any{
+  getSaveApp(): any {
     type SaveApplication = {
       models: any[];
       selectedShader: number;
     };
     var ret: SaveApplication = {
       models: [],
-      selectedShader: this.selectedShader
-    }
-    for (const model of this.models){
+      selectedShader: this.selectedShader,
+    };
+    for (const model of this.models) {
       ret.models.push(model.getSaveModel());
     }
     return ret;
@@ -43,7 +43,7 @@ class Application {
 
   loadDataFromJSON(data: any) {
     this.models = [];
-    for (const model of data.models){
+    for (const model of data.models) {
       var dummy = new Spider("test");
       dummy.loadModel(model);
       this.models.push(dummy);
@@ -119,12 +119,7 @@ class Application {
     const { radius, angle } = this.camera;
     let camPos = [0, 0, 0, 1];
 
-    let cameraMatrix = [
-      1, 0, 0, 0, 
-      0, 1, 0, 0, 
-      0, 0, 1, 0, 
-      0, 0, 0, 1
-    ];
+    let cameraMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
     cameraMatrix = m4.yRotate(cameraMatrix, degToRad(angle));
     cameraMatrix = m4.translate(cameraMatrix, 0, 0, radius * 1.5);
 
@@ -132,15 +127,15 @@ class Application {
     let mtrans = m4.translation(0, 0, radius * 1.5);
 
     let nCam = [0, 0, 0, 0];
-    for (let i=0;i<4;i++){
-      for (let j=0;j<4;j++){
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
         nCam[i] += camPos[j] * mtrans[j * 4 + i];
       }
     }
     camPos = [...nCam];
     nCam = [0, 0, 0, 0];
-    for (let i=0;i<4;i++){
-      for (let j=0;j<4;j++){
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
         nCam[i] += camPos[j] * mrot[j * 4 + i];
       }
     }
@@ -227,10 +222,10 @@ class Application {
     }
   }
 
-  setSelectedShader(num: number){
+  setSelectedShader(num: number) {
     this.selectedShader = num;
-    for (const model of this.models){
-      for (const shape of model.shapes){
+    for (const model of this.models) {
+      for (const shape of model.shapes) {
         shape.setSelectedShader(this.selectedShader);
       }
     }

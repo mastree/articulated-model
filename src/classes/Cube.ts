@@ -1,3 +1,4 @@
+import { cubeFragmentShader } from "../shader/fragment";
 import { degToRad, vDegToRad } from "../utils/rotate-utils";
 import Shape from "./Shape";
 import { CubeDefault, imageSize, image, texPos } from "../constant";
@@ -86,6 +87,7 @@ export class Cube extends Shape {
         ? toGlVertices(cubeConfig.vertices)
         : toGlVertices(genCubeVertices(cubeConfig.center!, cubeConfig.size!))
       : toGlVertices(genCubeVertices([0, 0, 0], [2, 2, 2]));
+    this.vertices = vertices;
     const faceColors = [
       [1.0, 1.0, 1.0, 1.0], // Front face: white
       [1.0, 0.0, 0.0, 1.0], // Back face: red

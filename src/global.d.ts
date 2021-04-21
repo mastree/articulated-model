@@ -22,7 +22,6 @@ type GLAttribute = {
   size: number;
 };
 
-type UniformNumber = "float" | "double" | "int";
 type UniformVNumber = "mat4" | "vec3" | "vec2";
 type UniformBool = "bool";
 type UniformSampler2D = "sampler2D";
@@ -37,16 +36,6 @@ type GLUniform =
       type: UniformBool;
       location: WebGLUniformLocation | null;
       value: boolean;
-    }
-  | {
-      type: UniformSampler2D;
-      location: WebGLUniformLocation | null;
-      value: number;
-    }
-  | {
-      type: UniformNumber;
-      location: WebGLUniformLocation | null;
-      value: number;
     };
 
 type ProgramInfo = {
@@ -61,9 +50,6 @@ type ProgramInfo = {
   uDirectionalVector: GLUniform;
   uDirectionalLightColor: GLUniform;
   uLightingOn: GLUniform;
-  // Kalo perlu yang beda di child class, tambah aja di bawah sini@
-  optionalAttribute?: GLAttribute;
-  optionalUniform?: GLUniform;
 
   // For articulation
   uTranslation: number[];

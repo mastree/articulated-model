@@ -274,14 +274,13 @@ export const bumpCubeVertexShader = `
   }
 
   void main() {
-    calulate_triangle_coordinate_system(aVertexPosition, a_P2, a_P3,
-                                        a_Texture_coordinate, a_Uv2, a_Uv3);
-    v_Vertex = vec3( uViewMatrix * vec4(aVertexPosition, 1.0) );
-    v_Normal = vec3( uViewMatrix * vec4(aVertexNormal, 0.0) );
-    v_U3d = vec3( uViewMatrix * vec4(v_U3d, 0.0) );
-    v_V3d = vec3( uViewMatrix * vec4(v_V3d, 0.0) );
+    calulate_triangle_coordinate_system(aVertexPosition, a_P2, a_P3, a_Texture_coordinate, a_Uv2, a_Uv3);
+    v_Vertex = vec3( uTransformationMatrix * vec4(aVertexPosition, 1.0) );
+    v_Normal = vec3( uTransformationMatrix * vec4(aVertexNormal, 0.0) );
+    v_U3d = vec3( uTransformationMatrix * vec4(v_U3d, 0.0) );
+    v_V3d = vec3( uTransformationMatrix * vec4(v_V3d, 0.0) );
     v_Texture_coordinate = a_Texture_coordinate;
-    gl_Position = uProjectionMatrix * uViewMatrix * vec4(aVertexPosition, 1.0);
+    gl_Position = uProjectionMatrix * uViewMatrix * uTransformationMatrix* vec4(aVertexPosition, 1.0);
   }
 `;
 

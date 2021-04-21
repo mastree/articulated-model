@@ -5,7 +5,7 @@ import {
   createProgram,
   loadTexture,
 } from "../utils/shader-utils";
-import { imageSize, image, texPos } from "../constant";
+import { imageSize, image, texPos, texCoords } from "../constant";
 import { vertexShaders } from "../shader/vertex";
 import { fragmentShaders } from "../shader/fragment";
 import { environmentTexture, patternTexture } from "@/utils/texture-utils";
@@ -18,6 +18,7 @@ export default abstract class Shape {
   program: WebGLProgram;
   programInfo: ProgramInfo;
   children: Shape[] = [];
+  vertices: number[] = [];
   animate: boolean = false;
   animationSpeed: number = 0.5;
   animationConfig: AnimationConfig = {
@@ -40,7 +41,7 @@ export default abstract class Shape {
     this.programInfo = createProgramInfo(program);
   }
 
-  getSaveShape(): any{
+  getSaveShape(): any {
     type SaveShape = {
       programInfo: ProgramInfo;
       children: SaveShape[];
@@ -48,7 +49,7 @@ export default abstract class Shape {
       animationSpeed: number;
       animationConfig: AnimationConfig;
       name: string;
-    }
+    };
     var node: SaveShape = {
       programInfo: this.programInfo,
       children: [],
@@ -56,14 +57,14 @@ export default abstract class Shape {
       animationSpeed: this.animationSpeed,
       animationConfig: this.animationConfig,
       name: this.name,
-    }
-    for (const child of this.children){
+    };
+    for (const child of this.children) {
       node.children.push(child.getSaveShape());
     }
     return node;
   }
 
-  loadTopData(data: any){
+  loadTopData(data: any) {
     const { program } = this;
     this.programInfo = {
       program: this.program,
@@ -157,6 +158,7 @@ export default abstract class Shape {
       0,
       0
     );
+    // console.log("hay", gl.getProgramInfoLog(this.program));
   }
 
   persistUniform(uniform: GLUniform) {
@@ -176,11 +178,6 @@ export default abstract class Shape {
         break;
       case "bool":
         gl.uniform1i(uniform.location, uniform.value ? 1 : 0);
-        break;
-      case "sampler2D":
-      case "float":
-      case "double":
-        gl.uniform1i(uniform.location, uniform.value);
         break;
     }
   }
@@ -225,56 +222,124 @@ export default abstract class Shape {
       environmentTexture(program);
     } else if (this.selectedShader == 3) {
       // https://csawesome.runestone.academy/runestone/books/published/learnwebgl2/11_surface_properties/10_bump_maps.html
-      const [texture, textureImage] = loadTexture("/img/taj_orig.jpg");
-      const [bumpTexture, bumpImage] = loadTexture("/img/taj_emboss.png");
+      const { vertices } = this;
+
+      const src1 = "/img/brick.png",
+        src2 = "/img/brick_bump.png";
+      const [texture, textureImage] = loadTexture(src1);
+      const [bumpTexture, bumpImage] = loadTexture(src2);
+      textureImage.src = src1;
+      bumpImage.src = src2;
 
       const oldLoad = bumpImage.onload;
+      let u_Image_size = [bumpImage.width ?? 0, bumpImage.height ?? 0];
       bumpImage.onload = function (e) {
         oldLoad?.call(this, e);
         u_Image_size = [bumpImage.width, bumpImage.height];
       };
+      const bruh = gl.getUniformLocation(program, "u_Image_size");
+      console.log("bruh", bruh);
+      gl.uniform2fv(
+        gl.getUniformLocation(program, "u_Image_size"),
+        new Float32Array(u_Image_size)
+      );
 
+      // texCoords
       const textureCoordBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-      // prettier-ignore
-      const texCoords = [
-        // Front
-        0.0,  0.0,
-        1.0,  0.0,
-        1.0,  1.0,
-        0.0,  1.0,
-        // Back
-        0.0,  0.0,
-        1.0,  0.0,
-        1.0,  1.0,
-        0.0,  1.0,
-        // Top
-        0.0,  0.0,
-        1.0,  0.0,
-        1.0,  1.0,
-        0.0,  1.0,
-        // Bottom
-        0.0,  0.0,
-        1.0,  0.0,
-        1.0,  1.0,
-        0.0,  1.0,
-        // Right
-        0.0,  0.0,
-        1.0,  0.0,
-        1.0,  1.0,
-        0.0,  1.0,
-        // Left
-        0.0,  0.0,
-        1.0,  0.0,
-        1.0,  1.0,
-        0.0,  1.0,
-      ];
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(texCoords),
+        gl.STATIC_DRAW
+      );
 
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, texture);
 
       gl.activeTexture(gl.TEXTURE1);
       gl.bindTexture(gl.TEXTURE_2D, bumpTexture);
+
+      let a_P2 = [],
+        a_P3 = [],
+        a_Uv2 = [],
+        a_Uv3 = [];
+      for (let n = 0, m = 0; n < vertices.length; n += 9, m += 6) {
+        // For the 1st vertex in the triangle
+        a_P2[n] = vertices[n + 3];
+        a_P2[n + 1] = vertices[n + 4];
+        a_P2[n + 2] = vertices[n + 5];
+
+        a_P3[n] = vertices[n + 6];
+        a_P3[n + 1] = vertices[n + 7];
+        a_P3[n + 2] = vertices[n + 8];
+
+        a_Uv2[m] = texCoords[m + 2];
+        a_Uv2[m + 1] = texCoords[m + 3];
+
+        a_Uv3[m] = texCoords[m + 4];
+        a_Uv3[m + 1] = texCoords[m + 5];
+
+        // For the 2nd vertex in the triangle
+        a_P2[n + 3] = vertices[n + 6];
+        a_P2[n + 4] = vertices[n + 7];
+        a_P2[n + 5] = vertices[n + 8];
+
+        a_P3[n + 3] = vertices[n];
+        a_P3[n + 4] = vertices[n + 1];
+        a_P3[n + 5] = vertices[n + 2];
+
+        a_Uv2[m + 2] = texCoords[m + 4];
+        a_Uv2[m + 3] = texCoords[m + 5];
+
+        a_Uv3[m + 2] = texCoords[m];
+        a_Uv3[m + 3] = texCoords[m + 1];
+
+        // For the 3rd vertex in the triangle
+        a_P2[n + 6] = vertices[n];
+        a_P2[n + 7] = vertices[n + 1];
+        a_P2[n + 8] = vertices[n + 2];
+
+        a_P3[n + 6] = vertices[n + 3];
+        a_P3[n + 7] = vertices[n + 4];
+        a_P3[n + 8] = vertices[n + 5];
+
+        a_Uv2[m + 4] = texCoords[m];
+        a_Uv2[m + 5] = texCoords[m + 1];
+
+        a_Uv3[m + 4] = texCoords[m + 2];
+        a_Uv3[m + 5] = texCoords[m + 3];
+      }
+      const uSampler = 0,
+        uBumpSampler = 1;
+      const loc1 = gl.getUniformLocation(program, "uSampler");
+      const loc2 = gl.getUniformLocation(program, "uBumpSampler");
+      gl.uniform1i(loc1, uSampler);
+      gl.uniform1i(loc2, uBumpSampler);
+      const custApplyAtr = (
+        program: WebGLProgram,
+        name: string,
+        value: number[],
+        size: number
+      ) => {
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(value), gl.STATIC_DRAW);
+
+        const location = gl.getAttribLocation(program, name);
+        // console.log(name, location);
+        gl.enableVertexAttribArray(location);
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
+      };
+      // attribute vec3 a_P2;
+      // attribute vec3 a_P3;
+      // attribute vec2 a_Uv2;
+      // attribute vec2 a_Uv3;
+      custApplyAtr(program, "a_Texture_coordinate", texCoords, 2);
+      custApplyAtr(program, "a_P2", a_P2, 3);
+      custApplyAtr(program, "a_P3", a_P3, 3);
+      custApplyAtr(program, "a_Uv2", a_Uv2, 2);
+      custApplyAtr(program, "a_Uv3", a_Uv3, 2);
     }
   }
 

@@ -38,12 +38,14 @@ export const LightingDefault: LightingConfig = {
 };
 
 export const imageSize = 4;
+// prettier-ignore
 export const image = [
   0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255,
   255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255,
   0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255,
   255, 255, 255, 255, 0, 0, 0, 255, 255, 255, 255, 255, 0, 0, 0, 255,
 ];
+// prettier-ignore
 export const texPos = [
   0, 0,
   1, 0,
@@ -74,6 +76,41 @@ export const texPos = [
   1, 0,
   1, 1,
   0, 1,
+];
+
+// for bump
+// prettier-ignore
+export const texCoords = [
+  // Front
+  0.0,  0.0,
+  1.0,  0.0,
+  1.0,  1.0,
+  0.0,  1.0,
+  // Back
+  0.0,  0.0,
+  1.0,  0.0,
+  1.0,  1.0,
+  0.0,  1.0,
+  // Top
+  0.0,  0.0,
+  1.0,  0.0,
+  1.0,  1.0,
+  0.0,  1.0,
+  // Bottom
+  0.0,  0.0,
+  1.0,  0.0,
+  1.0,  1.0,
+  0.0,  1.0,
+  // Right
+  0.0,  0.0,
+  1.0,  0.0,
+  1.0,  1.0,
+  0.0,  1.0,
+  // Left
+  0.0,  0.0,
+  1.0,  0.0,
+  1.0,  1.0,
+  0.0,  1.0,
 ];
 
 export const ShapeDefaults = [CubeDefault, TorusDefault, PrismDefault];
