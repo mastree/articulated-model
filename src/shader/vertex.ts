@@ -215,6 +215,7 @@ export const environmentCubeVertexShader = `
 `;
 
 export const bumpCubeVertexShader = `
+  precision highp int;
   precision highp float;
 
   // vertex
@@ -239,27 +240,47 @@ export const bumpCubeVertexShader = `
   varying vec2 fTexCoord;
   uniform vec3 uWorldCamPos;
 
-  varying vec3 R;
-  
-  ${matrixSnippet}
+  attribute vec2 a_Texture_coordinate;
+
+  attribute vec3 a_P2;
+  attribute vec3 a_P3;
+  attribute vec2 a_Uv2;
+  attribute vec2 a_Uv3;
+
+  varying vec3 v_Vertex;
+  varying vec3 v_Normal;
+
+  varying vec2 v_Texture_coordinate;
+
+  varying vec3 v_U3d;
+  varying vec3 v_V3d;
+
+  void calulate_triangle_coordinate_system(vec3 p1,  vec3 p2,  vec3 p3,
+                                          vec2 uv1, vec2 uv2, vec2 uv3) {
+    float u1 = uv1[0];
+    float v1 = uv1[1];
+    float u2 = uv2[0];
+    float v2 = uv2[1];
+    float u3 = uv3[0];
+    float v3 = uv3[1];
+
+    float divisor = (u3-u1)*(v2-v1) - (u2-u1)*(v3-v1);
+
+    v_U3d = ((v2-v1)*(p3-p1) - (v3-v1)*(p2-p1)) /  divisor;
+    v_V3d = ((u2-u1)*(p3-p1) - (u3-u1)*(p2-p1)) / -divisor;
+
+    normalize(v_U3d);
+    normalize(v_V3d);
+  }
 
   void main() {
-    fTexCoord = vTexCoord;
-    vColor = aVertexColor;
-
-    // env mapping
-    vec3 worldPos = (uTransformationMatrix * vec4(aVertexPosition, 1)).xyz;
-    vec3 worldNormal = normalize(mat3(uTransformationMatrix) * aVertexNormal);
-    vec3 worldCamPos = uWorldCamPos;
-    vec3 eyeToSurfaceDir = normalize(worldPos - worldCamPos);
-    R = reflect(eyeToSurfaceDir, worldNormal);
-    //======================
-    gl_Position = uProjectionMatrix * uViewMatrix * uTransformationMatrix *  vec4(aVertexPosition, 1);    
-
-    // lighting
-    vec4 transformedNormal = transpose(inverse(uTransformationMatrix)) * vec4(aVertexNormal, 1);
-    vec3 directionalVector = normalize(uDirectionalVector);
-    float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
-    vLighting = uAmbientLight + (uDirectionalLightColor * directional);
+    calulate_triangle_coordinate_system(aVertexPosition, a_P2, a_P3,
+                                        a_Texture_coordinate, a_Uv2, a_Uv3);
+    v_Vertex = vec3( uViewMatrix * vec4(aVertexPosition, 1.0) );
+    v_Normal = vec3( uViewMatrix * vec4(aVertexNormal, 0.0) );
+    v_U3d = vec3( uViewMatrix * vec4(v_U3d, 0.0) );
+    v_V3d = vec3( uViewMatrix * vec4(v_V3d, 0.0) );
+    v_Texture_coordinate = a_Texture_coordinate;
+    gl_Position = uProjectionMatrix * uViewMatrix * vec4(aVertexPosition, 1.0);
   }
 `;

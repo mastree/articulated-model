@@ -27,10 +27,5 @@ export class TestModel extends Model {
     shapes.push(cube2);
     shapes.push(cube3);
     shapes.push(cube4);
-
-    console.log(cube.programInfo.uTranslation)
-    console.log(cube2.programInfo.uTranslation)
-    console.log(cube3.programInfo.uTranslation)
-    console.log(cube4.programInfo.uTranslation)
   }
 }

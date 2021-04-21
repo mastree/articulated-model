@@ -117,7 +117,7 @@ export class Wing extends Shape {
     rightWing: boolean,
     cubeConfig?: CubeConfig
   ) {
-    super(cubeVertexShader, cubeFragmentShader, name);
+    super(name);
     const vertices: number[] = cubeConfig
       ? cubeConfig.vertices
         ? toGlVertices(cubeConfig.vertices)

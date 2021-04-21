@@ -22,12 +22,14 @@ type GLAttribute = {
   size: number;
 };
 
-type UniformNumber = "mat4" | "vec3";
+type UniformNumber = "float" | "double" | "int";
+type UniformVNumber = "mat4" | "vec3" | "vec2";
 type UniformBool = "bool";
+type UniformSampler2D = "sampler2D";
 
 type GLUniform =
   | {
-      type: UniformNumber;
+      type: UniformVNumber;
       location: WebGLUniformLocation | null;
       value: number[];
     }
@@ -35,6 +37,16 @@ type GLUniform =
       type: UniformBool;
       location: WebGLUniformLocation | null;
       value: boolean;
+    }
+  | {
+      type: UniformSampler2D;
+      location: WebGLUniformLocation | null;
+      value: number;
+    }
+  | {
+      type: UniformNumber;
+      location: WebGLUniformLocation | null;
+      value: number;
     };
 
 type ProgramInfo = {
@@ -61,6 +73,50 @@ type ProgramInfo = {
   uAncestorsMatrix: number[];
   uTransformationMatrix: GLUniform;
   uWorldCamPos: GLUniform;
+};
+
+// from https://csawesome.runestone.academy/runestone/books/published/learnwebgl2/11_surface_properties/10_bump_maps.html
+type BumpProgramInfo = {
+  // ProgramInfo
+  program: WebGLProgram;
+  aVertexPosition: GLAttribute;
+  aVertexNormal: GLAttribute;
+  aVertexColor: GLAttribute;
+  uProjectionMatrix: GLUniform;
+  uViewMatrix: GLUniform;
+
+  uAmbientLight: GLUniform;
+  uDirectionalVector: GLUniform;
+  uDirectionalLightColor: GLUniform;
+  uLightingOn: GLUniform;
+  // Kalo perlu yang beda di child class, tambah aja di bawah sini@
+  optionalAttribute?: GLAttribute;
+  optionalUniform?: GLUniform;
+
+  // For articulation
+  uTranslation: number[];
+  uRotation: number[];
+  uScale: number[];
+  anchorPoint: number[]; // length 3 (3D point)
+  uAncestorsMatrix: number[];
+  uTransformationMatrix: GLUniform;
+  uWorldCamPos: GLUniform;
+  // End of ProgramInfo
+
+  u_Light_position: GLUniform;
+  u_Light_color: GLUniform;
+  u_Shininess: GLUniform;
+  u_Ambient_intensities: GLUniform;
+  u_Image_size: GLUniform;
+  uSampler: GLUniform;
+  uBumpSampler: GLUniform;
+  a_Vertex: GLAttribute;
+  a_Normal: GLAttribute;
+  a_Texture_coordinate: GLAttribute;
+  a_P2: GLAttribute;
+  a_P3: GLAttribute;
+  a_Uv2: GLAttribute;
+  a_Uv3: GLAttribute;
 };
 
 type SubConfig = {
