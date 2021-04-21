@@ -123,8 +123,16 @@ class Application {
   }
 
   toggleLighting(on: boolean) {
+    for (const model of this.models) {
+      for (const shape of model.shapes) {
+        shape.toggleLighting(on);
+      }
+    }
+  }
+
+  toggleAnimation(on: boolean) {
     for (const shape of this.shapes) {
-      shape.toggleLighting(on);
+      shape.animate = on;
     }
   }
 
@@ -139,8 +147,6 @@ class Application {
   setSelectedModel(modelIndex: number) {
     this.shapes = this.models[modelIndex].shapes;
     this.selectedShape = this.shapes[0];
-    console.log(modelIndex);
-    console.log(this.shapes);
   }
 
   setSelectedShape(shapeIndex: number) {
