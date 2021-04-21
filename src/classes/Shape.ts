@@ -11,7 +11,7 @@ export default abstract class Shape {
   programInfo: ProgramInfo;
   // programInfos: ProgramInfo[] = [];
   children: Shape[] = [];
-  animate: boolean = true; // TODO: set defaultnya false, bikin toggler
+  animate: boolean = false;
   animationSpeed: number = 0.5;
   animationConfig: AnimationConfig = {
     rotation: [
@@ -416,7 +416,7 @@ export default abstract class Shape {
     this.animationConfig = { ...config };
   }
 
-  setAnimationSpeed(nSpeed: number){
+  setAnimationSpeed(nSpeed: number) {
     this.animationSpeed = nSpeed;
   }
 

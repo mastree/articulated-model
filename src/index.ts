@@ -270,6 +270,17 @@ toggleLightingBtn.onclick = () => {
   app.toggleLighting(on);
 };
 
+const toggleAnimationBtn = document.getElementById(
+  "toggleAnimation"
+) as HTMLInputElement;
+let onAnimation = false;
+toggleAnimationBtn.onclick = () => {
+  onAnimation = !onAnimation;
+  const onStr = onAnimation ? "ON" : "OFF";
+  document.getElementById("animationStatus")!.innerHTML = onStr;
+  app.toggleAnimation(onAnimation);
+};
+
 const resetBtn = document.getElementById("resetBtn") as HTMLInputElement;
 const loadDefaults = () => {
   app.loadDefaults();
