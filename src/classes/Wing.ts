@@ -1,5 +1,3 @@
-import { cubeVertexShader } from "../shader/vertex";
-import { cubeFragmentShader } from "../shader/fragment";
 import { degToRad, vDegToRad } from "../utils/rotate-utils";
 import Shape from "./Shape";
 import { CubeDefault, imageSize, image, texPos } from "../constant";
@@ -117,7 +115,7 @@ export class Wing extends Shape {
     rightWing: boolean,
     cubeConfig?: CubeConfig
   ) {
-    super(cubeVertexShader, cubeFragmentShader, name);
+    super(name);
     const vertices: number[] = cubeConfig
       ? cubeConfig.vertices
         ? toGlVertices(cubeConfig.vertices)
@@ -260,7 +258,6 @@ export class Wing extends Shape {
     this.persistVars();
 
     gl.useProgram(program);
-    // this.initShader();
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);

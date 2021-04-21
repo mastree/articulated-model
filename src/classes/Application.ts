@@ -42,14 +42,6 @@ class Application {
   }
 
   loadDataFromJSON(data: any) {
-    // console.log(this);
-    // for (let i = 0; i < this.shapes.length; i++) {
-    //   this.shapes[i].loadData((data.shapes[i] as Cube));
-    // }
-
-    // this.camera = data.camera as CameraConfig;
-    // this.projection = data.projection as Projection;
-    // this.lighting = data.lighting as LightingConfig;
     this.models = [];
     for (const model of data.models){
       var dummy = new Spider("test");
@@ -62,9 +54,6 @@ class Application {
   }
 
   loadDefaults() {
-    // for (let i = 0; i < this.shapes.length; i++) {
-    //   this.shapes[i].loadDefaults();
-    // }
     this.camera = { ...CameraDefault };
     this.lighting = { ...LightingDefault };
     this.applyProjection();

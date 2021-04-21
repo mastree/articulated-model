@@ -13,10 +13,8 @@ const app = new Application();
 app.models.push(new HumanoidAngel("Angel"));
 app.models.push(new Spider("Spider"));
 app.models.push(new Elephant("Elephant"));
-// app.models.push(new ChainCube("Chain Cube"));
 app.setSelectedModel(0);
 app.setSelectedShader(0);
-// app.loadEnvironment(app.shapes[0].program);
 
 let prev = Date.now();
 const render = (time: number) => {
@@ -322,51 +320,5 @@ loadBtn.onclick = (e) => {
     var res = JSON.parse(e.target.result);
     console.log(res);
     app.loadDataFromJSON(res);
-    // changeShape(0);
-    // app.render();
   };
-  // if (window.FileList && window.File && window.FileReader) {
-  //   uploadBtn.click();
-  // } else {
-  //   alert("file upload not supported by your browser!");
-  // }
 };
-
-// uploadBtn.onclick = (e) => {
-//   var files = uploadBtn.files as FileList;
-//   if (!files) return;
-//   var fr = new FileReader();
-//   if (!files.item(0)) return;
-//   fr.readAsText(files.item(0));
-//   fr.onload = (e) => {
-//     var res = JSON.parse(e.target.result);
-//     console.log(res);
-//   };
-
-//   // if (window.FileList && window.File && window.FileReader) {
-//   //   uploadBtn.click();
-//   // } else {
-//   //   alert("file upload not supported by your browser!");
-//   // }
-// };
-
-// uploadBtn.onclick = async (e: any) => {
-//   const reader = new FileReader();
-//   const file = e.target.files[0];
-
-//   console.log(file);
-
-//   reader.addEventListener("load", (e: any) => {
-//     try {
-//       var data = JSON.parse(e.target.result);
-//     } catch (err) {
-//       alert(`invalid json file data!\n${err}`);
-//     }
-
-//     app.loadDataFromJSON(data);
-//   });
-
-//   await reader.readAsText(file);
-//   app.render();
-//   // render(master);
-// };

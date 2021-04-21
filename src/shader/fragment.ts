@@ -61,6 +61,7 @@ export const environmentFragmentShader = `
 export const bumpFragmentShader = `
   precision highp float;
 
+  // from runestone
   varying vec3 v_Vertex;
   varying vec3 v_Normal;
   varying vec3 v_U3d, v_V3d;
@@ -71,7 +72,13 @@ export const bumpFragmentShader = `
   uniform vec3 u_Ambient_intensities;
   uniform vec2 u_Image_size;
   uniform float u_Shininess;
+  // end of runestone
 
+  varying vec4 vColor;
+  varying vec3 vLighting;
+
+  uniform bool uLightingOn;
+  
   uniform sampler2D uSampler;
   uniform sampler2D uBumpSampler;
   uniform bool uLightingOn;
@@ -131,8 +138,6 @@ export const bumpFragmentShader = `
   }
 
   void main() {
-    uSampler = 0;
-    uBumpSampler = 1;
     if (uLightingOn) {
       vec3 normal = bump_map_normal(v_Normal, v_Texture_coordinate);
       vec4 v_Color = texture2D(uSampler, v_Texture_coordinate);
