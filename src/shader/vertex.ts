@@ -263,3 +263,10 @@ export const bumpCubeVertexShader = `
     vLighting = uAmbientLight + (uDirectionalLightColor * directional);
   }
 `;
+
+export const vertexShaders: string[] = [
+  cubeVertexShader,
+  textureCubeVertexShader,
+  environmentCubeVertexShader,
+  bumpCubeVertexShader,
+];

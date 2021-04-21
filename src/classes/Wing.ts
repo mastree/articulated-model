@@ -260,7 +260,7 @@ export class Wing extends Shape {
     this.persistVars();
 
     gl.useProgram(program);
-    this.initShader();
+    // this.initShader();
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);

@@ -2,7 +2,9 @@ import { canvas, gl } from "@/sauce";
 import { CameraDefault, LightingDefault } from "../constant";
 import m4 from "../utils/m4-utils";
 import { degToRad } from "../utils/rotate-utils";
+import { Cube } from "./Cube";
 import { Model } from "./Models/Model";
+import { Spider } from "./Models/Spider";
 import Shape from "./Shape";
 
 class Application {
@@ -24,15 +26,39 @@ class Application {
     this.lighting = LightingDefault;
   }
 
+  getSaveApp(): any{
+    type SaveApplication = {
+      models: any[];
+      selectedShader: number;
+    };
+    var ret: SaveApplication = {
+      models: [],
+      selectedShader: this.selectedShader
+    }
+    for (const model of this.models){
+      ret.models.push(model.getSaveModel());
+    }
+    return ret;
+  }
+
   loadDataFromJSON(data: any) {
     // console.log(this);
-    for (let i = 0; i < this.shapes.length; i++) {
-      this.shapes[i].loadData(data.shapes[i]);
-    }
+    // for (let i = 0; i < this.shapes.length; i++) {
+    //   this.shapes[i].loadData((data.shapes[i] as Cube));
+    // }
 
-    this.camera = data.camera as CameraConfig;
-    this.projection = data.projection as Projection;
-    this.lighting = data.lighting as LightingConfig;
+    // this.camera = data.camera as CameraConfig;
+    // this.projection = data.projection as Projection;
+    // this.lighting = data.lighting as LightingConfig;
+    this.models = [];
+    for (const model of data.models){
+      var dummy = new Spider("test");
+      dummy.loadModel(model);
+      this.models.push(dummy);
+    }
+    this.setSelectedModel(0);
+    this.setSelectedShape(0);
+    this.setSelectedShader(this.selectedShader);
   }
 
   loadDefaults() {
@@ -214,8 +240,10 @@ class Application {
 
   setSelectedShader(num: number){
     this.selectedShader = num;
-    for (const shape of this.shapes){
-      shape.setSelectedShader(this.selectedShader);
+    for (const model of this.models){
+      for (const shape of model.shapes){
+        shape.setSelectedShader(this.selectedShader);
+      }
     }
   }
 
@@ -223,7 +251,6 @@ class Application {
     gl.clearDepth(1.0);
     gl.clearColor(1, 1, 1, 1.0);
     gl.enable(gl.DEPTH_TEST);
-    // gl.enable(gl.CULL_FACE);
     gl.depthFunc(gl.LEQUAL);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -234,7 +261,7 @@ class Application {
 
     this.applyLighting();
     let ident = m4.identity();
-    // this.loadEnvironment(this.shapes[0].program, false);
+    this.shapes[0].initShader();
     this.articulateRenderDfs(delta, this.shapes[0], ident);
   }
 
@@ -250,9 +277,6 @@ class Application {
   save(el: any) {
     let str = "" as string;
     let arr = [] as any;
-    // this.shapeList.forEach((element) => {
-    //   arr.push(element.toSaveData());
-    // });
     str = JSON.stringify(arr);
     console.log(JSON.parse(str));
     var data = "text/json;charset=utf-8," + encodeURIComponent(str);
@@ -262,14 +286,12 @@ class Application {
 
   load(
     res: {
-      // type: ShapeType;
       id: number;
       color: Vec3;
       selectedColor: Vec3;
       points: { id: number; pos: Vec2 }[];
     }[]
   ) {
-    // let arr: Shape[] = [];
     this.render();
   }
 }

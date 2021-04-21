@@ -144,3 +144,10 @@ export const bumpFragmentShader = `
     }
   }
 `;
+
+export const fragmentShaders: string[] = [
+  cubeFragmentShader,
+  textureFragmentShader,
+  environmentFragmentShader,
+  bumpFragmentShader,
+];

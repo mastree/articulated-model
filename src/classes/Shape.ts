@@ -2,18 +2,8 @@ import { gl } from "../sauce";
 import m4 from "../utils/m4-utils";
 import { createShader, createProgram } from "../utils/shader-utils";
 import { imageSize, image, texPos } from "../constant";
-import {
-  textureCubeVertexShader,
-  environmentCubeVertexShader,
-  cubeVertexShader,
-  bumpCubeVertexShader,
-} from "../shader/vertex";
-import {
-  textureFragmentShader,
-  environmentFragmentShader,
-  cubeFragmentShader,
-  bumpFragmentShader,
-} from "../shader/fragment";
+import { vertexShaders } from "../shader/vertex";
+import { fragmentShaders } from "../shader/fragment";
 
 const loadTexture = (url: string): [WebGLTexture | null, HTMLImageElement] => {
   const texture = gl.createTexture();
@@ -87,18 +77,6 @@ export default abstract class Shape {
   };
   scaledTime: number = 0;
   selectedShader: number = 1;
-  vertexShaders: string[] = [
-    cubeVertexShader,
-    textureCubeVertexShader,
-    environmentCubeVertexShader,
-    bumpCubeVertexShader,
-  ];
-  fragmentShaders: string[] = [
-    cubeFragmentShader,
-    textureFragmentShader,
-    environmentFragmentShader,
-    bumpFragmentShader,
-  ];
 
   constructor(
     vertexShader: string,
@@ -107,8 +85,8 @@ export default abstract class Shape {
   ) {
     this.program = createProgram(
       gl,
-      this.vertexShaders[this.selectedShader],
-      this.fragmentShaders[this.selectedShader]
+      vertexShaders[this.selectedShader],
+      fragmentShaders[this.selectedShader]
     );
     const { program } = this;
     this.programInfo = {
@@ -179,9 +157,30 @@ export default abstract class Shape {
     };
   }
 
-  loadData(data: any): void {
-    console.log(data.programInfo);
+  getSaveShape(): any{
+    type SaveShape = {
+      programInfo: ProgramInfo;
+      children: SaveShape[];
+      animate: boolean;
+      animationSpeed: number;
+      animationConfig: AnimationConfig;
+      name: string;
+    }
+    var node: SaveShape = {
+      programInfo: this.programInfo,
+      children: [],
+      animate: this.animate,
+      animationSpeed: this.animationSpeed,
+      animationConfig: this.animationConfig,
+      name: this.name,
+    }
+    for (const child of this.children){
+      node.children.push(child.getSaveShape());
+    }
+    return node;
+  }
 
+  loadTopData(data: any){
     const { program } = this;
     this.programInfo = {
       program: this.program,
@@ -249,7 +248,85 @@ export default abstract class Shape {
         value: data.programInfo.uWorldCamPos.value,
       },
     };
+    this.children = [];
+    this.animate = data.animate;
+    this.animationSpeed = data.animationSpeed;
+    this.animationConfig = data.animationConfig;
+    this.name = data.name;
+    this.setSelectedShader(this.selectedShader);
   }
+
+  // loadData(data: any): void {
+  //   console.log(data.programInfo);
+
+  //   const { program } = this;
+  //   this.programInfo = {
+  //     program: this.program,
+  //     aVertexPosition: {
+  //       buffer: gl.createBuffer(),
+  //       location: gl.getAttribLocation(program, "aVertexPosition"),
+  //       value: data.programInfo.aVertexPosition.value,
+  //       size: 3,
+  //     },
+  //     aVertexNormal: {
+  //       buffer: gl.createBuffer(),
+  //       location: gl.getAttribLocation(program, "aVertexNormal"),
+  //       value: data.programInfo.aVertexNormal.value,
+  //       size: 3,
+  //     },
+  //     aVertexColor: {
+  //       buffer: gl.createBuffer(),
+  //       location: gl.getAttribLocation(program, "aVertexColor"),
+  //       value: data.programInfo.aVertexColor.value,
+  //       size: 4,
+  //     },
+  //     uProjectionMatrix: {
+  //       type: "mat4",
+  //       location: gl.getUniformLocation(program, "uProjectionMatrix"),
+  //       value: data.programInfo.uProjectionMatrix.value,
+  //     },
+  //     uViewMatrix: {
+  //       type: "mat4",
+  //       location: gl.getUniformLocation(program, "uViewMatrix"),
+  //       value: data.programInfo.uViewMatrix.value,
+  //     },
+  //     uAmbientLight: {
+  //       type: "vec3",
+  //       location: gl.getUniformLocation(program, "uAmbientLight"),
+  //       value: data.programInfo.uAmbientLight.value,
+  //     },
+  //     uDirectionalVector: {
+  //       type: "vec3",
+  //       location: gl.getUniformLocation(program, "uDirectionalVector"),
+  //       value: data.programInfo.uDirectionalVector.value,
+  //     },
+  //     uDirectionalLightColor: {
+  //       type: "vec3",
+  //       location: gl.getUniformLocation(program, "uDirectionalLightColor"),
+  //       value: data.programInfo.uDirectionalLightColor.value,
+  //     },
+  //     uLightingOn: {
+  //       type: "bool",
+  //       location: gl.getUniformLocation(program, "uLightingOn"),
+  //       value: data.programInfo.uLightingOn.value,
+  //     },
+  //     uTranslation: data.programInfo.uTranslation,
+  //     uRotation: data.programInfo.uRotation,
+  //     uScale: data.programInfo.uScale,
+  //     anchorPoint: data.programInfo.anchorPoint,
+  //     uAncestorsMatrix: data.programInfo.uAncestorsMatrix,
+  //     uTransformationMatrix: {
+  //       type: "mat4",
+  //       location: gl.getUniformLocation(program, "uTransformationMatrix"),
+  //       value: data.programInfo.uTransformationMatrix.value,
+  //     },
+  //     uWorldCamPos: {
+  //       type: "vec3",
+  //       location: gl.getUniformLocation(program, "uWorldCamPos"),
+  //       value: data.programInfo.uWorldCamPos.value,
+  //     },
+  //   };
+  // }
 
   persistAttribute(attr: GLAttribute) {
     gl.bindBuffer(gl.ARRAY_BUFFER, attr.buffer);
@@ -650,8 +727,8 @@ export default abstract class Shape {
     this.selectedShader = id;
     this.program = createProgram(
       gl,
-      this.vertexShaders[this.selectedShader],
-      this.fragmentShaders[this.selectedShader]
+      vertexShaders[this.selectedShader],
+      fragmentShaders[this.selectedShader]
     );
     const { program } = this;
     this.programInfo.program = program;
