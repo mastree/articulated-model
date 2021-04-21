@@ -174,6 +174,7 @@ class Application {
   setSelectedModel(modelIndex: number) {
     this.shapes = this.models[modelIndex].shapes;
     this.selectedShape = this.shapes[0];
+    this.setSelectedShader(this.selectedShader);
   }
 
   setSelectedShape(shapeIndex: number) {

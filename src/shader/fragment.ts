@@ -9,13 +9,15 @@ uniform bool uLightingOn;
 `;
 
 export const cubeFragmentShader = `
-  ${variables}
-  varying vec2 fTexCoord;
-  uniform samplerCube texture;
-  
+  precision highp float;
+      
+  varying vec4 vColor;
+  varying vec3 vLighting;
+
+  uniform bool uLightingOn;
+
   void main() {
-    vec4 curCol = textureCube(texture, R);
-    gl_FragColor = uLightingOn ? vec4(vec3(curCol) * vLighting, 1.0) : curCol;
+    gl_FragColor = uLightingOn ? vec4(vec3(vColor) * vLighting, 1.0) : vColor;
   }
 `;
 
@@ -23,7 +25,6 @@ export const textureFragmentShader = `
   precision highp float;
     
   varying vec4 vColor;
-  varying vec3 vPosition;
   varying vec3 vLighting;
 
   uniform bool uLightingOn;

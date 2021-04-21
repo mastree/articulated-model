@@ -2,8 +2,8 @@ import { gl } from "../sauce";
 import m4 from "../utils/m4-utils";
 import { createShader, createProgram } from "../utils/shader-utils";
 import { imageSize, image, texPos } from "../constant";
-import { textureCubeVertexShader, environmentCubeVertexShader } from "../shader/vertex";
-import { textureFragmentShader, environmentFragmentShader } from "../shader/fragment";
+import { textureCubeVertexShader, environmentCubeVertexShader, cubeVertexShader } from "../shader/vertex";
+import { textureFragmentShader, environmentFragmentShader, cubeFragmentShader } from "../shader/fragment";
 
 export default abstract class Shape {
   program: WebGLProgram;
@@ -22,8 +22,8 @@ export default abstract class Shape {
   };
   scaledTime: number = 0;
   selectedShader: number = 1;
-  vertexShaders: string[] = [textureCubeVertexShader, environmentCubeVertexShader];
-  fragmentShaders: string[] = [textureFragmentShader, environmentFragmentShader];
+  vertexShaders: string[] = [cubeVertexShader, textureCubeVertexShader, environmentCubeVertexShader];
+  fragmentShaders: string[] = [cubeFragmentShader, textureFragmentShader, environmentFragmentShader];
 
   constructor(
     vertexShader: string,
@@ -247,7 +247,7 @@ export default abstract class Shape {
   initShader() {
     const { program } = this;
 
-    if (this.selectedShader == 0){
+    if (this.selectedShader == 1){
       var texture = gl.createTexture();
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -278,7 +278,7 @@ export default abstract class Shape {
       var vTexCoord = gl.getAttribLocation(program, "vTexCoord");
       gl.enableVertexAttribArray(vTexCoord);
       gl.vertexAttribPointer(vTexCoord, 2, gl.FLOAT, false, 0, 0);
-    } else if (this.selectedShader == 1){
+    } else if (this.selectedShader == 2){
       let useImg = false;
       if (useImg){
         var texture = gl.createTexture();
@@ -367,7 +367,7 @@ export default abstract class Shape {
         gl.activeTexture( gl.TEXTURE0 );
         gl.uniform1i(gl.getUniformLocation(program, "texture"),0);
       }
-    } else{
+    } else if (this.selectedShader == 3){
       // TODO: bump mapping
     }
   }

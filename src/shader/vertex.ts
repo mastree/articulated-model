@@ -83,7 +83,7 @@ highp mat4 transpose(in highp mat4 inMatrix) {
 }
 `;
 
-const variables = `
+export const cubeVertexShader = `
   precision highp float;
 
   // vertex
@@ -103,29 +103,16 @@ const variables = `
 
   varying vec4 vColor;
   varying vec3 vLighting;
-`;
 
-export const cubeVertexShader = `
-  ${variables}
-  attribute vec2 vTexCoord;
+  attribute  vec2 vTexCoord;
   varying vec2 fTexCoord;
   uniform vec3 uWorldCamPos;
 
-  varying vec3 R;
-  
   ${matrixSnippet}
 
   void main() {
-    fTexCoord = vTexCoord;
     vColor = aVertexColor;
 
-    // env mapping
-    vec3 worldPos = (uTransformationMatrix * vec4(aVertexPosition, 1)).xyz;
-    vec3 worldNormal = normalize(mat3(uTransformationMatrix) * aVertexNormal);
-    vec3 worldCamPos = uWorldCamPos;
-    vec3 eyeToSurfaceDir = normalize(worldPos - worldCamPos);
-    R = reflect(eyeToSurfaceDir, worldNormal);
-    //======================
     gl_Position = uProjectionMatrix * uViewMatrix * uTransformationMatrix *  vec4(aVertexPosition, 1);    
 
     // lighting
@@ -154,7 +141,6 @@ export const textureCubeVertexShader = `
   uniform vec3 uDirectionalVector;
   uniform vec3 uDirectionalLightColor;
 
-  varying vec3 vPosition;
   varying vec4 vColor;
   varying vec3 vLighting;
 
@@ -167,7 +153,6 @@ export const textureCubeVertexShader = `
   void main() {
     fTexCoord = vTexCoord;
     vColor = aVertexColor;
-    vPosition = aVertexPosition;
 
     gl_Position = uProjectionMatrix * uViewMatrix * uTransformationMatrix *  vec4(aVertexPosition, 1);    
 

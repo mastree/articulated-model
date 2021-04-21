@@ -15,7 +15,7 @@ app.models.push(new Spider("Spider"));
 app.models.push(new Elephant("Elephant"));
 // app.models.push(new ChainCube("Chain Cube"));
 app.setSelectedModel(0);
-app.setSelectedShader(1);
+app.setSelectedShader(0);
 // app.loadEnvironment(app.shapes[0].program);
 
 let prev = Date.now();
